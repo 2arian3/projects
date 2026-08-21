@@ -531,6 +531,143 @@ html,body{background:var(--bg);}
 		</aside>
 	</section>
 
+	<!-- 2.2 Ownership -->
+	<section>
+		<div class="slide">
+			<header class="slide-head">
+				<div class="kicker">OptiServe <span class="sep">/</span> 02 My role &amp; ownership</div>
+				<h2>What I built, and what was already there</h2>
+				<p class="dek">I worked on this alone. <em>The honest split:</em> the search strategies come from published research. The engineering around them is mine.</p>
+			</header>
+			<div class="slide-body">
+				<div class="g-2-1 grow">
+					<div class="card">
+						<div class="card-t">Components I own end to end</div>
+						<div class="g2" style="gap:11px;">
+							<div>
+								<ul class="bul sm">
+									<li><b>The AWS wrapper.</b> I tightened it until every AWS call in the project was <b>9 operations across 4 services</b>, all in one folder. Nothing outside <code>optiserve/aws/</code> talks to AWS at all.</li>
+									<li><b>Always put things back.</b> Before changing anything, I save the function&rsquo;s original settings. They get restored no matter how the run ends &mdash; success, crash, <code>Ctrl-C</code>, or being killed.</li>
+									<li><b>Runs you can resume.</b> Progress is saved under a fingerprint of the run&rsquo;s settings. Change a setting and you get a fresh run, instead of quietly mixing results that don&rsquo;t belong together.</li>
+								</ul>
+							</div>
+							<div>
+								<ul class="bul sm">
+									<li><b>Acquisition-function vectorization.</b> Rewrote <code>update_knowledge</code> from a Python loop to a NumPy kernel: <b>0.71 s &rarr; 0.0005 s</b>, bit-identical output.</li>
+									<li><b>A cache.</b> Keyed on the <b>exact numbers</b>, never rounded ones. Plus a second cache for the 54&nbsp;% of the work that only depends on the pipeline&rsquo;s shape.</li>
+									<li><b>Tests and CI.</b> Took the AWS folder from <b>0&nbsp;% to 76&ndash;100&nbsp;%</b> test coverage. The integration tests run twice, against two different fake-AWS setups.</li>
+									<li><b>Compat-flag discipline.</b> Two optimizer bugs I could not simply fix became named flags with a baseline on <i>both</i> sides.</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+
+					<div class="stack">
+						<div class="card">
+							<div class="card-t">Judgement &amp; communication</div>
+							<ul class="bul sm">
+								<li>One noise-reduction trick makes results look cleaner but shifts the average by <b>+1.3&nbsp;%</b>. I labelled it a <code>METHODOLOGY WARNING</code> in the code instead of hiding it.</li>
+								<li>Every result records <b>which settings produced it</b>, so numbers from different versions stay comparable.</li>
+							</ul>
+						</div>
+						<div class="card" style="border-left:4px solid var(--amber);">
+							<div class="card-t" style="color:var(--amber);">Not mine &mdash; say this before they ask</div>
+							<ul class="bul sm" style="--pa:var(--amber);">
+								<li>The three search strategies <b>come from published research, not from me.</b> One mode reproduces the paper exactly, bugs included. What&rsquo;s mine is the corrected version, the harness that measures how good the search actually is, and the switches that keep both honest.</li>
+								<li>The AWS wrapper classes <b>already existed</b>. I reviewed, hardened and tested them &mdash; which is how I found one method that <b>nothing in the project ever called</b>.</li>
+								<li>SciPy, networkx and moto do the numerical, graph and mocking work.</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">OptiServe &mdash; 2 / 6</div>
+		</div>
+		<aside class="notes">
+			Volunteer the amber card unprompted. A hiring manager who discovers the prior-research
+			boundary by asking has learned something different from one you told. The `reset_config`
+			zero-callers find is a good micro-story: it shows you read code rather than trusting it.
+		</aside>
+	</section>
+
+	<!-- 2.3 Architecture -->
+	<section>
+		<div class="slide">
+			<header class="slide-head tight">
+				<div class="kicker">OptiServe <span class="sep">/</span> 03 System architecture</div>
+				<h2>Two engines that meet at exactly one point</h2>
+			</header>
+			<div class="slide-body">
+				<!-- DIAGRAM: to swap in a final asset, replace this <pre class="mermaid"> with <img src="docs/optiserve-arch.svg" alt="..."> -->
+				<figure class="diagram" style="flex:0 0 440px;">
+						<div class="diagram-bar"><span class="t">System architecture</span><span class="id">fig-01 &middot; optiserve-arch</span></div>
+						<div class="diagram-stage">
+<pre class="mermaid">
+flowchart TB
+  CLI["optiserve CLI"]
+
+  subgraph A["ENGINE A - online profiling - costs money"]
+    direction LR
+    CM["ConfigManager - set, verify, restore in a finally"]
+    EXP["Explorer - cold start, then N concurrent invokes"]
+    LP["LogParser - billed duration, OOM, timeout"]
+    SMP["Sampler - adaptive, atomic checkpoints"]
+    FIT["Objective + curve_fit - active learning"]
+    CM --> EXP --> LP --> SMP --> FIT
+    FIT -.->|"next memory to sample"| CM
+  end
+
+  BR["WorkflowGraph.add_ml_function - THE SEAM - samples each fitted curve onto the memory grid"]
+
+  subgraph B["ENGINE B - offline - deterministic"]
+    direction LR
+    WG["WorkflowGraph - probabilistic control flow"]
+    APM["PerformanceModeling - de-loop, reduce to a DAG"]
+    OPT["ApplicationOptimizer - greedy PRCP"]
+    EV["Evaluation - brute-forced ground truth"]
+    WG --> APM --> OPT --> EV
+    OPT -.-> APM
+  end
+
+  CLI --> A
+  A --> BR
+  BR --> B
+</pre>
+						</div>
+					<figcaption class="diagram-cap"><b>The join between the two halves is a single method.</b> <code>add_ml_function</code> turns measured curves into a plain lookup table. After that, it&rsquo;s all just arithmetic.</figcaption>
+				</figure>
+
+				<div class="g-3-2 grow">
+					<div class="card flush">
+							<table class="ctab dense">
+								<thead><tr><th>Package</th><th>Responsibility</th></tr></thead>
+								<tbody>
+									<tr><td class="nm">optiserve/aws <span class="tech" style="font-weight:400;">boto3 + moto</span></td><td class="rsp">The only place AWS is called &mdash; 9 operations, 4 services.</td></tr>
+									<tr><td class="nm">profiling <span class="tech" style="font-weight:400;">ThreadPoolExecutor</span></td><td class="rsp">Sweeps memory, forces cold starts, prunes infeasible configs.</td></tr>
+									<tr><td class="nm">modeling <span class="tech" style="font-weight:400;">SciPy + NumPy</span></td><td class="rsp">Fits latency-vs-memory; picks the next memory to sample.</td></tr>
+									<tr><td class="nm">workflow <span class="tech" style="font-weight:400;">networkx</span></td><td class="rsp">Probabilistic control-flow graph; materializes <code>perf_profile</code> &mdash; the seam.</td></tr>
+									<tr><td class="nm">optimization <span class="tech" style="font-weight:400;">PRCP + compat flags</span></td><td class="rsp">Ranks critical paths; commits the best single-node move.</td></tr>
+									<tr><td class="nm">evaluation <span class="tech" style="font-weight:400;">brute-force CSV</span></td><td class="rsp">Brute-forces ground truth; measures the greedy gap.</td></tr>
+								</tbody>
+							</table>
+						</div>
+					<div class="callout">
+						<div><span class="lead">Why splitting it in two is the whole idea</span>
+							Half A talks to real AWS, so it&rsquo;s slow, noisy and costs money. Half B touches nothing, so it&rsquo;s <b>free and gives the same answer every time</b>.
+							That&rsquo;s why <b>137 of 155 tests run with no internet</b>, and why the whole thing can run against a fake AWS by setting one variable.
+							<b>None of the code knows whether AWS is real.</b></div>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">OptiServe &mdash; 3 / 6</div>
+		</div>
+		<aside class="notes">
+			Point at the BR box first, then work outwards in both directions. If they ask "why not one
+			engine": because the slow, unpredictable half would then infect every test you write
+			about the fast, predictable half.
+		</aside>
+	</section>
+
 </section>
 </div><!-- /.slides -->
 </div><!-- /.reveal -->
