@@ -433,6 +433,105 @@ html,body{background:var(--bg);}
 	</section>
 
 </section>
+<!-- =====================================================================
+     SECTION 2 — OPTISERVE
+     ===================================================================== -->
+<section class="proj-a">
+
+	<!-- 2.0 opener -->
+	<section>
+		<div class="hero">
+			<div class="sec-no">01</div>
+			<div class="eyebrow" style="margin-top:16px;">MSc thesis &middot; research artifact</div>
+			<h1 style="margin-top:12px;font-size:66px;">OptiServe</h1>
+			<div class="rule"></div>
+			<p class="sub">You have an ML pipeline running on AWS Lambda. For each step you pick
+				<em>how much memory</em> to give it and <em>which model</em> to run. Those choices decide your speed,
+				your bill, and your accuracy. <em>OptiServe picks them for you.</em></p>
+			<div class="mstrip" style="margin-top:30px;max-width:1030px;">
+				<div><div class="v">40,960</div><div class="l">configurations in the App3 benchmark space &mdash; three functions</div></div>
+				<div><div class="v">27.5&times; / 8.5&times;</div><div class="l">latency and cost spread across identical functional behaviour</div></div>
+				<div><div class="v">137 / 155</div><div class="l">tests that need no network, no credentials, no AWS</div></div>
+			</div>
+			<div class="pills" style="margin-top:26px;max-width:1030px;">
+				<span>Python 3.11/3.12</span><span>boto3 &middot; botocore</span><span>SciPy curve_fit</span><span>NumPy</span>
+				<span>networkx</span><span>AWS Lambda</span><span>CloudWatch Logs Insights</span><span>Step Functions</span>
+				<span>moto</span><span>pytest</span><span>ruff &middot; mypy</span><span>CloudWatch EMF</span>
+			</div>
+		</div>
+		<aside class="notes">
+			Lead with the question, not the tech. If they only remember one sentence: "two engines that
+			meet at exactly one point." Everything else on the next six slides hangs off that seam.
+		</aside>
+	</section>
+
+	<!-- 2.1 Problem -->
+	<section>
+		<div class="slide">
+			<header class="slide-head">
+				<div class="kicker">OptiServe <span class="sep">/</span> 01 Overview &amp; problem</div>
+				<h2>Serverless took away the servers. It didn&rsquo;t take away the tuning.</h2>
+			</header>
+			<div class="slide-body">
+				<div class="g3">
+					<div class="card rail">
+						<div class="card-t">Business problem</div>
+						<ul class="bul sm">
+							<li>Lambda exposes <b>exactly one performance knob</b> &mdash; memory size &mdash; which proportionally allocates vCPU.</li>
+							<li>You pay for memory &times; time. More memory costs more per second, but the job also finishes faster. So <b>the cost curve is U-shaped</b> &mdash; there is a real sweet spot, and it&rsquo;s different for every function.</li>
+							<li>ML workloads add a second knob: <b>which model variant to serve</b>. That moves latency, cost <i>and</i> output quality at once.</li>
+						</ul>
+					</div>
+					<div class="card rail">
+						<div class="card-t">Why static config fails</div>
+						<ul class="bul sm">
+							<li><b>The best setting depends on the data, not the code.</b> A batch of 12-page records and a batch of 400-page records want different memory &mdash; from the <i>same function</i>.</li>
+							<li><b>Best parts don&rsquo;t make a best whole.</b> Tuning each function on its own doesn&rsquo;t give you the best pipeline. An extra MB is worth more on the slowest path than off it.</li>
+							<li><b>Retries break your intuition.</b> A step that loops back runs about 1.43&times; per request. &ldquo;Tune the slowest function&rdquo; is wrong when a fast one runs three times.</li>
+						</ul>
+					</div>
+					<div class="card rail">
+						<div class="card-t">The engineering challenge</div>
+						<ul class="bul sm">
+							<li>The space is <b>combinatorial</b>: 40,960 configurations for <i>three</i> functions. A ten-stage pipeline with four variants each is ~10<sup>17</sup>.</li>
+							<li>Every measurement <b>costs real money and real wall-clock</b> &mdash; you cannot brute-force in production.</li>
+							<li>Measurements are <b>noisy</b>: cold starts, busy servers, run-to-run variation. The optimizer has to cope with unreliable readings.</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="g-2-1 grow">
+					<div class="card">
+						<div class="card-t neutral">The business case, in one table &mdash; the App3 benchmark</div>
+						<table class="ctab">
+							<thead><tr><th>Dimension</th><th>Range</th><th>Spread</th></tr></thead>
+							<tbody>
+								<tr><td class="nm">End-to-end latency</td><td class="tech">2,955 &ndash; 81,280 ms</td><td class="rsp"><b>27.5&times;</b></td></tr>
+								<tr><td class="nm">Cost per million invocations</td><td class="tech">321.78 &ndash; 2,728.36</td><td class="rsp"><b>8.5&times;</b></td></tr>
+								<tr><td class="nm">Configuration space</td><td class="tech">3 nodes &times; (1,4,4) variants &times; (16,16,10) steps</td><td class="rsp"><b>40,960</b></td></tr>
+							</tbody>
+						</table>
+						<p class="tiny muted" style="margin-top:2px;"><code>f1 &rarr; resnet &rarr; yolo</code>, with a 0.3 back-edge and a 0.2 self-loop. A 27&times; latency and 8.5&times; cost spread across <b>identical functional behaviour</b> is the entire business case &mdash; and nobody tunes 40,960 configurations by hand.</p>
+					</div>
+					<div class="card tint">
+						<div class="card-t">Why this is an EvenUp problem</div>
+						<p style="font-size:16.5px;line-height:1.45;">This is the same choice you make in a document pipeline: <b>use the cheap model by default, and only call the expensive one when the cheap one isn&rsquo;t sure</b> &mdash;
+							while staying inside limits on turnaround time, cost per case, and accuracy.</p>
+						<p style="font-size:16.5px;line-height:1.45;margin-top:6px;">Different dial. <b>Same problem.</b></p>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">OptiServe &mdash; 1 / 6</div>
+		</div>
+		<aside class="notes">
+			The U-shaped cost curve is the thing most people get wrong — say it explicitly: more memory
+			can be CHEAPER, because duration falls faster than the per-ms price rises.
+			Constraint interaction is the fourth point if they push: "under 5s p95" AND "under $X per
+			thousand docs" AND "at least 0.9 accuracy" is not three independent problems.
+		</aside>
+	</section>
+
+</section>
 </div><!-- /.slides -->
 </div><!-- /.reveal -->
 
