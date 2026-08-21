@@ -383,6 +383,55 @@ html,body{background:var(--bg);}
 		</aside>
 	</section>
 
+	<!-- 1.1 Agenda -->
+	<section>
+		<div class="slide">
+			<header class="slide-head">
+				<div class="kicker">Agenda <span class="sep">/</span> press <span class="mono">&darr;</span> to drill into any section</div>
+				<h2>What I&rsquo;m going to show you</h2>
+				<p class="dek">Press <span class="mono">&darr;</span> on any project to go six slides deep: <em>the problem, what I built, how it works, how data moves through it, what it measured, and what I gave up.</em></p>
+			</header>
+			<div class="slide-body">
+				<ol class="agenda grow">
+					<li style="--ac:var(--accent);">
+						<span class="no">01</span>
+						<span class="ttl">OptiServe <small>MSc thesis. How much memory, and which model, should each step of a cloud ML pipeline use?</small></span>
+						<span class="tag">Python &middot; AWS &middot; optimization</span>
+					</li>
+					<li style="--ac:var(--cyan);">
+						<span class="no">02</span>
+						<span class="ttl">Guardian on DGX Spark <small>Moving a six-agent app off a cloud AI API and onto our own hardware, without rewriting the app</small></span>
+						<span class="tag">TensorRT-LLM &middot; NVFP4 &middot; FastAPI</span>
+					</li>
+					<li style="--ac:var(--teal);">
+						<span class="no">03</span>
+						<span class="ttl">BakeryPilot <small>An AI agent connected to a real database that simply cannot change anything without a person approving it</small></span>
+						<span class="tag">FastAPI &middot; LangGraph &middot; Postgres</span>
+					</li>
+					<li style="--ac:var(--violet);">
+						<span class="no">04</span>
+						<span class="ttl">Applied to EvenUp <small>How I&rsquo;d build the pipeline that turns medical records into structured data, and why I&rsquo;d process one page at a time</small></span>
+						<span class="tag">system design</span>
+					</li>
+				</ol>
+				<div class="callout">
+					<div>
+						<span class="lead">The through-line</span>
+						In all three, the slow and unpredictable AI model sits behind <b>one small, well-defined interface</b>.
+						That single choice is what makes the other two things possible:
+						<b>measuring what the model really costs</b>, and <b>proving where its answers came from</b>.
+					</div>
+				</div>
+			</div>
+			<div class="crumb">Intro &mdash; 2 / 2</div>
+		</div>
+		<aside class="notes">
+			Don't read the list. Say: "Three systems, and then ten minutes on how I'd apply this to
+			your extraction pipeline — that last section is the one I'd most like your pushback on."
+			If they're short on time, ask which project they want; the deck navigates sideways.
+		</aside>
+	</section>
+
 </section>
 </div><!-- /.slides -->
 </div><!-- /.reveal -->
