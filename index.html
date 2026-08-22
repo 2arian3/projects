@@ -1289,6 +1289,433 @@ flowchart TB
 	</section>
 
 </section>
+<!-- =====================================================================
+     SECTION 4 — BAKERYPILOT
+     ===================================================================== -->
+<section class="proj-c">
+
+	<!-- 4.0 opener -->
+	<section>
+		<div class="hero">
+			<div class="sec-no">03</div>
+			<div class="eyebrow" style="margin-top:16px;">TMLS Hackathon &middot; 322 commits</div>
+			<h1 style="margin-top:12px;font-size:62px;">BakeryPilot</h1>
+			<div class="rule"></div>
+			<p class="sub">An AI agent connected to a real database that <em>cannot change anything without a person clicking approve</em>.
+				Plus a proxy tuned so you watch the system think, instead of watching a spinner.</p>
+			<div class="mstrip" style="margin-top:30px;max-width:1030px;">
+				<div><div class="v">0</div><div class="l">ways the agent can change real data on its own &mdash; blocked by design, not by prompt wording</div></div>
+				<div><div class="v">34 / 47 / 35 / 5</div><div class="l">tables, foreign keys, check rules, and guards that block edits to history</div></div>
+				<div><div class="v">125</div><div class="l">API endpoints &mdash; the agent uses the same ones a person does, with no shortcuts</div></div>
+			</div>
+			<div class="pills" style="margin-top:26px;max-width:1030px;">
+				<span>FastAPI</span><span>LangGraph</span><span>PostgreSQL 16</span><span>SQLAlchemy 2.x async</span><span>asyncpg</span>
+				<span>Redis 7</span><span>MongoDB 7</span><span>nginx 1.27</span><span>Next.js 15</span><span>Docker Compose</span>
+				<span>GitHub Actions</span><span>Alembic</span><span>SSE</span>
+			</div>
+		</div>
+		<aside class="notes">
+			Lead with the HITL gate, not the chat UI. "An LLM with no unattended write path" is the
+			sentence that connects to their "prove it in court" problem. The 322 commits number is there to
+			signal this was built, not scaffolded.
+		</aside>
+	</section>
+
+	<!-- 4.1 Problem -->
+	<section>
+		<div class="slide">
+			<header class="slide-head">
+				<div class="kicker">BakeryPilot <span class="sep">/</span> 01 Overview &amp; problem</div>
+				<h2>How do you let an AI touch real business data without letting it break anything?</h2>
+			</header>
+			<div class="slide-body">
+				<div class="g3">
+					<div class="card rail">
+						<div class="card-t">Business problem</div>
+						<ul class="bul sm">
+							<li>To answer <i>&ldquo;can we make 5,000 croissants in Toronto?&rdquo;</i>, a bakery manager has to <b>check stock, recipes and schedules by hand</b> across separate systems.</li>
+							<li>The answer usually means <b>doing something</b> &mdash; move butter from the other plant. That needs approval, a name attached, and a record.</li>
+							<li>An agent that can only answer is a toy. An agent that acts on its own is a liability.</li>
+						</ul>
+					</div>
+					<div class="card rail">
+						<div class="card-t">User impact</div>
+						<ul class="bul sm">
+							<li>Plain-English questions run against <b>real stock, recipes and facilities</b> &mdash; not fake data.</li>
+							<li>Every change shows up as a <b>card someone has to approve</b>, so a person stays accountable.</li>
+							<li>Status updates stream as it works (<i>&ldquo;checking stock levels&rdquo;</i>), so you <b>see what it&rsquo;s doing</b> instead of a spinner.</li>
+						</ul>
+					</div>
+					<div class="card rail">
+						<div class="card-t">The engineering challenge</div>
+						<ul class="bul sm">
+							<li>The rules have to hold no matter who is writing &mdash; the agent, a seed script, the admin API, or a person with a database console.</li>
+							<li>Long-lived <b>streaming responses through a proxy</b> whose default settings break them.</li>
+							<li>Deploying to <b>one live server</b>, where a failed database migration means lost data, not a quick undo.</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="g-2-1 grow">
+					<div class="card" style="border-left:4px solid var(--amber);">
+						<div class="card-t" style="color:var(--amber);">Three corrections I make before anyone asks</div>
+						<div class="g3" style="gap:14px;">
+							<ul class="bul sm" style="--pa:var(--amber);">
+								<li><b>It isn&rsquo;t GCP.</b> It&rsquo;s one Ubuntu server on <b>OpenStack</b>, deployed by a <b>runner installed on that same server</b>. The skills carry over exactly &mdash; but I say OpenStack, because that&rsquo;s what it is.</li>
+							</ul>
+							<ul class="bul sm" style="--pa:var(--amber);">
+								<li><b>No search-by-meaning shipped.</b> The database extension is installed, but there are <b>no embeddings and no similarity queries</b>. I designed the schema for it, then <b>cut the feature at about 36 hours</b> to protect what already worked.</li>
+							</ul>
+							<ul class="bul sm" style="--pa:var(--amber);">
+								<li><b>No HTTPS.</b> It&rsquo;s plain HTTP on port 80. I wrote up three ways to add TLS instead, which I&rsquo;d rather be able to explain than have copy-pasted one command.</li>
+							</ul>
+						</div>
+					</div>
+					<div class="card tint">
+						<div class="card-t">Why this is an EvenUp problem</div>
+						<p style="font-size:16.5px;line-height:1.45;">&ldquo;Never let an AI write client-facing data without review&rdquo; is <b>the</b> rule in legal tech.</p>
+						<p style="font-size:16.5px;line-height:1.45;margin-top:6px;">Here the <b>structure</b> enforces it: the agent has no way to write to real tables at all.
+							The worst it can do is leave an unapproved card sitting there.</p>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">BakeryPilot &mdash; 1 / 6</div>
+		</div>
+		<aside class="notes">
+			Deliver the three corrections crisply and move on — don't grovel. The vector one is
+			actually a scoping-judgment story, which is worth more to a hiring manager than a
+			half-built RAG layer. "I chose the topology to make consistency free, then descoped the
+			feature" is the line.
+		</aside>
+	</section>
+
+	<!-- 4.2 Ownership -->
+	<section>
+		<div class="slide">
+			<header class="slide-head">
+				<div class="kicker">BakeryPilot <span class="sep">/</span> 02 My role &amp; ownership</div>
+				<h2>The database, the proxy, and the deployment pipeline</h2>
+			</header>
+			<div class="slide-body">
+				<div class="g-2-1 grow">
+					<div class="card">
+						<div class="card-t">Components I own end to end</div>
+						<div class="g2" style="gap:11px;">
+							<div>
+								<ul class="bul sm">
+									<li><b>The database schema and its safety net.</b> 34 tables, <b>47 foreign keys, 35 check rules, and 5 tables you cannot edit or delete from</b>. Corrections are new rows that cancel out the old ones. The database refuses the edit outright.</li>
+									<li><b>The human approval gate.</b> Six kinds of card, each pending until someone accepts or rejects it. Deciding twice is rejected. On approval, the card, the data change and the audit trail all land in <b>one transaction</b>.</li>
+									<li><b>The Nginx proxy.</b> Tuned for long-lived streams: buffering off, caching off, a one-hour read timeout, and reused connections to the backend.</li>
+								</ul>
+							</div>
+							<div>
+								<ul class="bul sm">
+									<li><b>The deploy pipeline.</b> The runner lives on the server, so there are <b>no deployment secrets anywhere</b> &mdash; no SSH key, no service-account file, nothing stored in GitHub. Deploys are queued so two can never overlap.</li>
+									<li><b>Migration safety.</b> A database backup before every schema change, keeping the last 30. Migrations stop on the first error. The proxy config is validated before it&rsquo;s reloaded.</li>
+									<li><b>A three-level prompt store.</b> A short-lived cache first, then MongoDB with a 2-second timeout, then prompt files shipped with the app. If Mongo goes down it stops trying and uses the files.</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+
+					<div class="stack">
+						<div class="card">
+							<div class="card-t">Judgement &amp; communication</div>
+							<ul class="bul sm">
+								<li><b>Made the call to cut a feature.</b> At about 36 hours I dropped search-by-meaning to protect the parts that worked, and kept the schema design that would make it easy to add later.</li>
+								<li>Sorted every dependency by one question: if it goes down, do we give <b>wrong answers, or just fewer features?</b> Only the second kind got a fallback.</li>
+							</ul>
+						</div>
+						<div class="card" style="border-left:4px solid var(--amber);">
+							<div class="card-t" style="color:var(--amber);">Not mine</div>
+							<ul class="bul sm" style="--pa:var(--amber);">
+								<li>The <b>web frontend</b> and the product design were my teammates&rsquo; work.</li>
+								<li>The <b>eight specialist agents</b> and their prompts were a shared effort. I built the tool layer they call through.</li>
+								<li>LangGraph, SQLAlchemy, Alembic and Nginx do the heavy lifting for orchestration, database access, migrations and proxying.</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">BakeryPilot &mdash; 2 / 6</div>
+		</div>
+		<aside class="notes">
+			The one-liner for the schema work: "Application validation protects this version of the
+			code. Database constraints protect every future version and every path that isn't mine."
+			That sentence is why the triggers are in the database and not in the ORM.
+		</aside>
+	</section>
+
+	<!-- 4.3 Architecture -->
+	<section>
+		<div class="slide">
+			<header class="slide-head tight">
+				<div class="kicker">BakeryPilot <span class="sep">/</span> 03 System architecture</div>
+				<h2>One VM, one public port, and a human between the agent and the data</h2>
+			</header>
+			<div class="slide-body">
+				<div class="g-3-2 grow">
+					<!-- DIAGRAM: to swap in a final asset, replace this <pre class="mermaid"> with <img src="docs/bakerypilot-arch.svg" alt="..."> -->
+					<figure class="diagram">
+						<div class="diagram-bar"><span class="t">System architecture</span><span class="id">fig-03 &middot; bakerypilot-arch</span></div>
+						<div class="diagram-stage">
+<pre class="mermaid">
+flowchart TB
+  Browser["Operator browser - hand-rolled SSE reader"]
+  Nginx["nginx 1.27 - the only public port 80 - proxy_buffering off"]
+  Frontend["frontend :3000 - Next.js 15 SSR"]
+
+  subgraph App["BACKEND :8000 - agent imported in-process"]
+    direction LR
+    Routers["29 routers - 125 REST endpoints"]
+    Graph["LangGraph orchestrator"]
+    Agents["8 specialist agents"]
+    Tools["httpx tools - clients of the same API"]
+    Routers --> Graph --> Agents --> Tools
+    Tools -.->|"internal hostname"| Routers
+  end
+
+  subgraph Gate["HUMAN-IN-THE-LOOP GATE"]
+    direction LR
+    Cards["action_cards row - state pending"]
+    Human["Operator confirms"]
+    Execs["6 deterministic executors"]
+    Cards --> Human --> Execs
+  end
+
+  subgraph Stores["STORAGE TIER - internal only"]
+    direction LR
+    Postgres["PostgreSQL 16 - 34 tables, append-only triggers"]
+    Redis["Redis 7 - events and cache"]
+    Mongo["MongoDB 7 - versioned prompts"]
+  end
+
+  Browser -->|"HTTP :80"| Nginx
+  Nginx --> Frontend
+  Nginx -->|"regex /api"| App
+  App --> Gate
+  App --> Stores
+  Gate -->|"one transaction"| Stores
+  App -.->|"SSE frames"| Browser
+</pre>
+						</div>
+						<figcaption class="diagram-cap"><b>The agent isn&rsquo;t a separate service.</b> It runs inside the backend and reads data through the same public API a person uses &mdash; no direct database access, no shortcuts.</figcaption>
+					</figure>
+
+					<div class="stack">
+						<div class="card flush">
+							<table class="ctab dense">
+								<thead><tr><th>Component</th><th>Responsibility</th></tr></thead>
+								<tbody>
+									<tr><td class="nm">Nginx ingress <span class="tech" style="font-weight:400;">1.27-alpine</span></td><td class="rsp">Only public port; <code>proxy_buffering off</code> so SSE actually streams.</td></tr>
+									<tr><td class="nm">FastAPI backend <span class="tech" style="font-weight:400;">uvicorn --proxy-headers</span></td><td class="rsp">29 routers, 125 endpoints; strict layering; three-tier validation.</td></tr>
+									<tr><td class="nm">LangGraph <span class="tech" style="font-weight:400;">in-process import</span></td><td class="rsp">Classifies intent, routes to 8 specialists, runs bounded ReAct loops.</td></tr>
+									<tr><td class="nm">Agent tool layer <span class="tech" style="font-weight:400;">httpx, timeout=10</span></td><td class="rsp">Ordinary API clients &mdash; every constraint on a human applies to them.</td></tr>
+									<tr><td class="nm">HITL gate <span class="tech" style="font-weight:400;">action_cards + jsonb</span></td><td class="rsp">Six card kinds stay pending until a human confirms; one commit.</td></tr>
+									<tr><td class="nm">Postgres SoR <span class="tech" style="font-weight:400;">SQLAlchemy 2.x async</span></td><td class="rsp">34 tables, 32 indexes, 47 FKs, 35 CHECKs, 5 append-only triggers.</td></tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="callout">
+							<div><span class="lead">The decision I&rsquo;d bring up before being asked</span>
+								In development there&rsquo;s an <code>agent</code> container. In production it&rsquo;s <b>turned off</b>, because its startup command just runs eight test prompts and exits &mdash;
+								it would restart forever. <b>Turning a would-be microservice into a plain import</b> removed a network hop, a health check and a restart loop.
+								It cost nothing, because the agent never needed to scale on its own.</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">BakeryPilot &mdash; 3 / 6</div>
+		</div>
+		<aside class="notes">
+			If they ask "why is the agent calling your own REST API over HTTP instead of just using the
+			ORM?" — that IS the security model. It means the agent inherits every validation, every
+			permission check, and every constraint the REST layer enforces, with no bypass to maintain.
+			The cost is a loopback hop that never leaves the bridge network.
+		</aside>
+	</section>
+
+	<!-- 4.4 Data flow -->
+	<section>
+		<div class="slide">
+			<header class="slide-head tight">
+				<div class="kicker">BakeryPilot <span class="sep">/</span> 04 Execution &amp; data flow</div>
+				<h2>One question: <span class="muted" style="font-weight:400;">&ldquo;can we make 5,000 croissants at the Toronto plant?&rdquo;</span></h2>
+			</header>
+			<div class="slide-body">
+				<ol class="flow grow">
+					<li><span class="n">1</span><div><div class="ttl">Request enters <span class="an">keepalive 32/upstream &middot; client_max_body_size 25m</span></div>
+						<div class="dt"><code>streamChat()</code> POSTs <code>/api/chat</code> with an <code>AbortController</code>; the Nginx regex location proxies to <code>backend:8000</code>, stamping the four <code>X-Forwarded-*</code>/<code>Host</code> headers.</div></div></li>
+
+					<li><span class="n">2</span><div><div class="ttl">Headers, CORS, validation <span class="an">422 before any handler code runs</span></div>
+						<div class="dt">uvicorn rewrites the request scope from forwarded headers so the app sees the true client IP and scheme; the <code>ChatRequest</code> Pydantic model rejects malformed bodies.</div></div></li>
+
+					<li><span class="n">3</span><div><div class="ttl">SSE stream opens <span class="an">proxy_read_timeout 3600s API / 300s frontend</span></div>
+						<div class="dt"><code>EventSourceResponse</code> wraps an async generator. <b>Nothing is buffered</b> &mdash; the first <code>status</code> frame reaches the browser in milliseconds, before the LLM has produced a token.</div></div></li>
+
+					<li><span class="n">4</span><div><div class="ttl">Intent classification <span class="an">MemorySaver checkpointer per thread_id</span></div>
+						<div class="dt"><code>_graph.astream()</code> walks <code>classify_intent</code>; a conditional edge routes to one of 8 specialists. An <code>InMemoryStore</code> carries cross-turn memory, so <i>&ldquo;and at the Mississauga plant?&rdquo;</i> resolves next turn.</div></div></li>
+
+					<li><span class="n">5</span><div><div class="ttl">Progressive status <span class="an">only works because Nginx isn&rsquo;t buffering</span></div>
+						<div class="dt">The handler counts graph emissions: #1 means classification finished, so it emits the resolved intent as human-readable status; #2 means the specialist finished.</div></div></li>
+
+					<li><span class="n">6</span><div><div class="ttl">Tools over REST <span class="an">explicit timeout=10 on every httpx call</span></div>
+						<div class="dt">A ReAct loop over a bounded tool set: <code>resolve_product_sku</code> &rarr; <code>get_product_recipe</code> &rarr; <code>query_lots</code>, then multiply <code>kg_per_unit &times; 5000</code> per ingredient and find the bottleneck.</div></div></li>
+
+					<li><span class="n">7</span><div><div class="ttl">Action card drafted <span class="an">zero domain rows written at this point</span></div>
+						<div class="dt"><code>draft_lot_transfer</code> <b>does not move inventory.</b> It inserts one <code>action_cards</code> row with <code>state='pending'</code> and a <code>jsonb</code> payload; the fenced card id is stripped from the prose.</div></div></li>
+
+					<li><span class="n">8</span><div><div class="ttl">Tokens stream back <span class="an">12 ms cadence &middot; whitespace-preserving tokenizer</span></div>
+						<div class="dt">Client-side, a hand-rolled SSE parser over a <code>ReadableStream</code> &mdash; because the browser&rsquo;s <code>EventSource</code> only issues GET, and this endpoint is a POST carrying history.</div></div></li>
+
+					<li><span class="n">9</span><div><div class="ttl">Human confirms, FEFO executes <span class="an">409 on re-decide &middot; one transaction, one commit</span></div>
+						<div class="dt">The transfer executor draws lots <b>expiry-ascending</b>, re-homes or splits each, writes <code>inventory_events</code> rows, and records unsatisfied remainder as <code>kg_unsatisfied</code> &mdash; <b>the audit trail records the shortfall rather than silently succeeding.</b></div></div></li>
+				</ol>
+				<div class="note"><b>The property worth stating out loud:</b> there is no intermediate state where a card reads <code>confirmed</code> but the stock never moved.
+					Every state change carries a <code>decided_by</code> and a <code>decided_at</code>; every inventory effect is a row in an immutable log.
+					<b>You can reconstruct who approved what, when, and what it did.</b></div>
+			</div>
+			<div class="crumb">BakeryPilot &mdash; 4 / 6</div>
+		</div>
+		<aside class="notes">
+			Step 8's "why not EventSource" is a great small answer: EventSource is GET-only, the chat
+			endpoint is a POST with a body. The same file DOES use EventSource for /api/events, which
+			is a GET — so it's a considered choice, not ignorance of the API.
+		</aside>
+	</section>
+
+	<!-- 4.5 Metrics -->
+	<section>
+		<div class="slide">
+			<header class="slide-head tight">
+				<div class="kicker">BakeryPilot <span class="sep">/</span> 05 Metrics &amp; engineering impact</div>
+				<h2>Counts I can prove by opening a file in front of you</h2>
+			</header>
+			<div class="slide-body">
+				<div class="g4">
+					<div class="metric"><div class="v">0</div><div class="l">unattended agent domain writes</div><div class="d">The worst it can do is leave a card sitting unapproved</div><span class="chip reproducible">structural</span></div>
+					<div class="metric"><div class="v">125 / 29</div><div class="l">endpoints / routers</div><div class="d">67 GET &middot; 43 POST &middot; 6 PATCH &middot; 5 DELETE &middot; 4 PUT</div><span class="chip reproducible">from repo</span></div>
+					<div class="metric"><div class="v">143</div><div class="l">Python tests</div><div class="d">91 backend + 52 agent, in <b>2 of the 3</b> parallel CI jobs. The third runs the frontend tests</div><span class="chip reproducible">from repo</span></div>
+					<div class="metric"><div class="v">0</div><div class="l">deployment secrets</div><div class="d">The runner lives on the server, so there&rsquo;s no SSH key or credentials file to leak</div><span class="chip reproducible">structural</span></div>
+				</div>
+
+				<div class="g-3-2 grow">
+					<div class="card">
+						<div class="card-t neutral">The database floor &mdash; every one verified in <code>schema.sql</code></div>
+						<table class="ctab">
+							<thead><tr><th>Guard</th><th>Count</th><th>What it buys</th></tr></thead>
+							<tbody>
+								<tr><td class="nm">Tables / indexes</td><td class="tech">34 / 32</td><td class="rsp">The source of truth. Not reachable from outside the server.</td></tr>
+								<tr><td class="nm">Foreign keys</td><td class="tech">47</td><td class="rsp">Links between tables that stay valid no matter who writes.</td></tr>
+								<tr><td class="nm">CHECK constraints</td><td class="tech">35</td><td class="rsp">Business rules enforced by the database itself.</td></tr>
+								<tr><td class="nm">Append-only triggers</td><td class="tech">5</td><td class="rsp">History can&rsquo;t be edited or deleted. Corrections are new rows.</td></tr>
+								<tr><td class="nm">CD safety</td><td class="tech">30 dumps</td><td class="rsp">A backup before every schema change. Migrations stop on first error.</td></tr>
+							</tbody>
+						</table>
+						<div class="note" style="border-style:solid;border-color:var(--line);background:var(--surface-2);">
+							<b>Why in the database and not the app code:</b> the agent, seed scripts, the admin API and a person at a console all reach those tables by different routes.
+							App-level checks only protect <i>this</i> version of the code. Database rules protect every future version, and every route I didn&rsquo;t write.
+						</div>
+					</div>
+
+					<div class="stack">
+						<div class="card">
+							<div class="card-t">Also true</div>
+							<ul class="bul sm">
+								<li><b>~10,734 LOC backend + ~2,894 LOC agent</b>, 322 commits.</li>
+								<li>The whole test suite <b>runs without a database or an API key</b>, which is why it can run on every push to every branch.</li>
+								<li>Deploys only trigger on relevant file changes, and they queue rather than overlap, so two pushes can never run migrations at the same time.</li>
+							</ul>
+						</div>
+						<div class="card" style="border-left:4px solid var(--muted);">
+							<div class="card-t neutral">Stated limits</div>
+							<ul class="bul sm" style="--pa:var(--muted);">
+								<li><b>No real latency numbers.</b> The ~90 s figure is just <b>30 retries &times; 3 seconds</b> from the config, not something I timed. I&rsquo;d measure properly before quoting response times.</li>
+								<li>One server, one copy of everything. No redundancy at any level.</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">BakeryPilot &mdash; 5 / 6</div>
+		</div>
+		<aside class="notes">
+			"Structural" is the honest chip here: these are counts, not benchmarks. If they ask for
+			latency, say you'd measure it with `ab -n 200 -c 10` and time-to-first-token with
+			`curl -N -w "%{time_starttransfer}"` — naming the command is better than naming a number
+			you didn't measure.
+		</aside>
+	</section>
+
+	<!-- 4.6 Trade-offs -->
+	<section>
+		<div class="slide">
+			<header class="slide-head tight">
+				<div class="kicker">BakeryPilot <span class="sep">/</span> 06 Trade-offs &amp; learnings</div>
+				<h2>What I chose, what it cost me, and what broke</h2>
+			</header>
+			<div class="slide-body">
+				<div class="g3">
+					<div class="to">
+						<div class="axis">How to run the agent</div>
+						<div class="pick"><span class="yes">In-process library import</span><span class="vs">over</span><span class="no">a separate agent service</span></div>
+						<p class="why">It removed a network hop, a health check and a restart loop, and cost nothing &mdash; because the agent <b>never needed to scale separately</b>.</p>
+						<p class="cost"><b>Cost:</b> the backend image has to be built from the <b>repo root</b>, because it depends on the agent folder next door.</p>
+					</div>
+					<div class="to">
+						<div class="axis">Search feature</div>
+						<div class="pick"><span class="yes">Descope semantic retrieval</span><span class="vs">over</span><span class="no">a half-built RAG layer</span></div>
+						<p class="why">I put the vector store <i>inside Postgres</i> so embeddings and rows would save together in one transaction &mdash; <b>consistency for free</b>. Then I cut the feature at ~36 hours to protect what already worked.</p>
+						<p class="cost"><b>Cost:</b> an empty feature sitting there. I say &ldquo;designed, not shipped&rdquo; every time it comes up.</p>
+					</div>
+					<div class="to">
+						<div class="axis">Should deploys wait for tests?</div>
+						<div class="pick"><span class="yes">CD parallel to CI</span><span class="vs">over</span><span class="no">CD gated on CI</span></div>
+						<p class="why">At a hackathon, <b>a flaky test blocking a demo fix</b> was the bigger risk. It was deliberate, and it&rsquo;s written in the workflow file.</p>
+						<p class="cost"><b>Cost:</b> <b>a red build deploys.</b> Correct for a demo, wrong for production &mdash; and it&rsquo;s the first thing I&rsquo;d change.</p>
+					</div>
+				</div>
+
+				<div class="g-1-2 grow">
+					<div class="card tint">
+						<div class="card-t">The thing I most want to remember</div>
+						<p style="font-size:18px;line-height:1.5;">The bug was never the streaming. It was a <b>60-second timeout hiding behind a buffering problem</b>.</p>
+						<p style="font-size:15.5px;line-height:1.42;color:var(--muted);">The chat looked frozen, then dumped everything at once. I called the app directly, bypassing the proxy, and <b>the text arrived bit by bit</b>. So the backend was fine and <b>the proxy was the problem</b>. Working out <i>which layer</i> was at fault was the real work. The one-line fix was the easy part.</p>
+					</div>
+					<div class="g2">
+						<div class="card">
+							<div class="card-t" style="color:var(--cyan);">Edge cases handled</div>
+							<ul class="risk edge">
+								<li><b>Approving the same card twice.</b> The second attempt is rejected, checked before anything runs.</li>
+								<li><b>Transfers that can&rsquo;t be fully filled.</b> The shortfall is written down, so the record shows what was missing instead of quietly claiming success.</li>
+								<li><b>The API address is baked in at build time.</b> Changing the environment variable isn&rsquo;t enough &mdash; the frontend has to be rebuilt.</li>
+								<li><b>MongoDB going down.</b> Three levels of fallback, and once it fails the app stops retrying and uses the bundled files.</li>
+							</ul>
+						</div>
+						<div class="card">
+							<div class="card-t" style="color:var(--rose);">Weak spots I&rsquo;d name before you found them</div>
+							<ul class="risk fail">
+								<li><b>Deploys don&rsquo;t wait for tests.</b> They run side by side, so a failing build still ships.</li>
+								<li><b>There is downtime on deploy.</b> The old container stops before the new one starts, so the site errors for that window.</li>
+								<li><b>No automatic rollback.</b> There&rsquo;s always a backup and a revert-and-push path &mdash; manual, but quick.</li>
+								<li><b>One server, one copy</b> of every service. Nothing is redundant.</li>
+							</ul>
+							<div class="note" style="padding:6px 9px;"><b>The fix I&rsquo;d ship first:</b> blue/green behind the Nginx I already built &mdash; flip the <code>upstream</code> block and <code>nginx -s reload</code>. An upstream swap, not a new architecture.</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">BakeryPilot &mdash; 6 / 6</div>
+		</div>
+		<aside class="notes">
+			Naming your own pipeline's three weaknesses before they find them is the move here. Then
+			immediately give the fix order: gate CD on CI, blue/green for zero-downtime, then redundancy.
+			"Those were correct trade-offs for a hackathon and they're all wrong for production" is the
+			exact framing — it shows you know the difference rather than not knowing the weakness.
+		</aside>
+	</section>
+
+</section>
 </div><!-- /.slides -->
 </div><!-- /.reveal -->
 
