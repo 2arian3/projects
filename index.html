@@ -851,6 +851,444 @@ flowchart TB
 	</section>
 
 </section>
+<!-- =====================================================================
+     SECTION 3 — GUARDIAN ON DGX SPARK
+     ===================================================================== -->
+<section class="proj-b">
+
+	<!-- 3.0 opener -->
+	<section>
+		<div class="hero">
+			<div class="sec-no">02</div>
+			<div class="eyebrow" style="margin-top:16px;">NVIDIA Spark Hack Toronto &middot; my scope: the inference layer</div>
+			<h1 style="margin-top:12px;font-size:60px;">Guardian on DGX&nbsp;Spark</h1>
+			<div class="rule"></div>
+			<p class="sub">A six-agent emergency-help app was calling a cloud AI API. I moved it onto
+				<em>a single machine in the room</em> &mdash; without changing a line of the app itself.</p>
+			<div class="mstrip" style="margin-top:30px;max-width:1030px;">
+				<div><div class="v">1 file</div><div class="l">in the whole project talks to an AI vendor, so switching providers is a config change</div></div>
+				<div><div class="v">30B / ~3B</div><div class="l">total size vs. how much actually runs per word &mdash; that gap is the whole trick</div></div>
+				<div><div class="v">~16 GB</div><div class="l">NVFP4 checkpoint on disk, down from ~60 GB at BF16</div></div>
+			</div>
+			<div class="pills" style="margin-top:26px;max-width:1030px;">
+				<span>TensorRT-LLM 1.3.0rc15</span><span>Nemotron Nano 30B-A3B</span><span>NVFP4</span><span>GB10 Grace Blackwell</span>
+				<span>FastAPI</span><span>LangGraph</span><span>Docker Compose</span><span>Next.js</span><span>Tailscale</span><span>SSE</span>
+			</div>
+		</div>
+		<aside class="notes">
+			Scope honestly in the first sentence: "six-agent system built by a team at a hackathon; my
+			piece was the inference layer." Then the three things you owned: the abstraction boundary,
+			the engine bake-off, the production deployment.
+		</aside>
+	</section>
+
+	<!-- 3.1 Problem -->
+	<section>
+		<div class="slide">
+			<header class="slide-head">
+				<div class="kicker">Guardian <span class="sep">/</span> 01 Overview &amp; problem</div>
+				<h2>Move a 30-billion-parameter model onto one desktop machine, without rewriting the app</h2>
+			</header>
+			<div class="slide-body">
+				<div class="g3">
+					<div class="card rail">
+						<div class="card-t">Business problem</div>
+						<ul class="bul sm">
+							<li>Guardian handles <b>medical emergencies at home</b>. Sending an elderly person&rsquo;s health data and speech to someone else&rsquo;s API is a privacy risk.</li>
+							<li>Paying per word means an app that&rsquo;s always listening has no cost ceiling.</li>
+							<li>A demo that dies when the venue WiFi dies is not a demo.</li>
+						</ul>
+					</div>
+					<div class="card rail">
+						<div class="card-t">User impact</div>
+						<ul class="bul sm">
+							<li>Everything runs <b>on the machine</b>. Nothing the user says leaves the room.</li>
+							<li>Shrinking the model to <b>~16 GB</b> left enough room to run a second model alongside it.</li>
+							<li>Reachable over a private network, so the demo worked from anywhere &mdash; not just the venue&rsquo;s wifi.</li>
+						</ul>
+					</div>
+					<div class="card rail">
+						<div class="card-t">The engineering challenge</div>
+						<ul class="bul sm">
+							<li>The app was written for <b>one cloud API&rsquo;s behaviour</b>. Local models differ in how they split text, call tools, and think out loud.</li>
+							<li>The machine has <b>one GPU</b> and shared memory. There&rsquo;s no fast dedicated video memory and no second GPU to fall back on.</li>
+							<li>I had to be able to swap the serving engine <b>without touching app code</b>, or I&rsquo;d never have had time to compare three of them in a weekend.</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="g-2-1 grow">
+					<div class="card" style="border-left:4px solid var(--amber);">
+						<div class="card-t" style="color:var(--amber);">The hardware correction I lead with, before anyone can catch it</div>
+						<div class="g2" style="gap:14px;">
+							<ul class="bul sm" style="--pa:var(--amber);">
+								<li>A DGX <b>Spark</b> is <b>one</b> GPU and a 20-core ARM CPU on a single chip package. The link between them is <b>NVLink-C2C</b> &mdash; <i>not</i> NVSwitch, and <i>not</i> a multi-GPU setup.</li>
+								<li>So there was <b>no tensor parallelism</b>. You can&rsquo;t split a model across GPUs when you only have one.</li>
+							</ul>
+							<ul class="bul sm" style="--pa:var(--amber);">
+								<li>~128 GB of <b>memory shared by the CPU and GPU</b> (121 GiB usable). There&rsquo;s no separate video memory &mdash; <code>nvidia-smi</code> shows none, you check it with <code>free -h</code>.</li>
+								<li>The real constraint isn&rsquo;t how the chips are wired together. It&rsquo;s that this memory runs at <b>~273 GB/s, where a datacentre GPU gets several TB/s</b>.</li>
+							</ul>
+						</div>
+					</div>
+					<div class="card tint">
+						<div class="card-t">Why this is an EvenUp problem</div>
+						<p style="font-size:16.5px;line-height:1.45;">A document platform needs the same gap between its <b>extraction pipeline</b> and <b>whichever model it happens to use this quarter</b>.</p>
+						<p style="font-size:16.5px;line-height:1.45;margin-top:6px;">The pipeline shouldn&rsquo;t know or care whether it&rsquo;s talking to a hosted model or your own.
+							<b>Switching should be a config change, not a migration.</b></p>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">Guardian &mdash; 1 / 6</div>
+		</div>
+		<aside class="notes">
+			Say the hardware correction unprompted and early. Anyone who has touched a Spark knows it's a
+			single-GPU desktop box; claiming NVSwitch or multi-GPU TP is the fastest way to lose the room.
+			The honest story is better anyway — bandwidth-bound decode on LPDDR5X is a more sophisticated
+			observation than "I used tensor parallelism". Keep TP/PP/NVSwitch in your pocket for the
+			forward-looking question about scaling to an H200 node.
+		</aside>
+	</section>
+
+	<!-- 3.2 Ownership -->
+	<section>
+		<div class="slide">
+			<header class="slide-head">
+				<div class="kicker">Guardian <span class="sep">/</span> 02 My role &amp; ownership</div>
+				<h2>I owned the model layer. The rest of the app was the team&rsquo;s.</h2>
+			</header>
+			<div class="slide-body">
+				<div class="g-2-1 grow">
+					<div class="card">
+						<div class="card-t">Three things, in the order I built them</div>
+						<div class="g3" style="gap:13px;">
+							<div>
+								<div class="card-t" style="font-size:11.5px;margin-bottom:7px;"><span class="n">1</span> The abstraction boundary</div>
+								<ul class="bul sm">
+									<li>Every agent talks to <b>one interface</b>, using our own plain data types &mdash; <code>Message</code>, <code>ToolSpec</code>, <code>ToolCall</code>, <code>LLMResponse</code>.</li>
+									<li>The rule is written in the file itself: <i>a vendor&rsquo;s own objects must never leave the adapter</i>.</li>
+									<li><b>Exactly one file imports a vendor library.</b> That&rsquo;s what made comparing three engines possible in a weekend.</li>
+								</ul>
+							</div>
+							<div>
+								<div class="card-t" style="font-size:11.5px;margin-bottom:7px;"><span class="n">2</span> The engine bake-off</div>
+								<ul class="bul sm">
+									<li>Tested <b>Ollama, vLLM and TensorRT-LLM</b> with <b>real conversations from the app</b>, not made-up prompts. The app calls tools, so the benchmark had to as well.</li>
+									<li>Landed on TRT-LLM + a published NVFP4 checkpoint of Nemotron Nano 30B-A3B.</li>
+								</ul>
+							</div>
+							<div>
+								<div class="card-t" style="font-size:11.5px;margin-bottom:7px;"><span class="n">3</span> Production deployment</div>
+								<ul class="bul sm">
+									<li>Ran TensorRT-LLM in a container behind an OpenAI-shaped endpoint, with the app and UI next to it.</li>
+									<li>Tuned the model&rsquo;s memory reservation to <b>88 % of what was free</b> in the shared 121 GiB pool.</li>
+									<li>Gave the engine direct host networking and kept the app isolated &mdash; a deliberate choice, not a default.</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+
+					<div class="stack">
+						<div class="card">
+							<div class="card-t">The bug I&rsquo;d talk about longest</div>
+							<p style="font-size:16px;line-height:1.45;">The model&rsquo;s &ldquo;thinking&rdquo; mode <b>quietly broke the router</b>. I gave it 24 words to pick an agent; it spent all 24 thinking, returned nothing, and
+								<b>every message fell through to the default agent</b>. No error, anywhere.</p>
+							<p style="font-size:16px;line-height:1.45;margin-top:6px;">The fix needed <b>two layers</b>, because the documented setting didn&rsquo;t work on this backend: turn thinking off in the config <i>and</i> put <code>/no_think</code> at the start of the prompt.</p>
+						</div>
+						<div class="card" style="border-left:4px solid var(--amber);">
+							<div class="card-t" style="color:var(--amber);">Not mine</div>
+							<ul class="bul sm" style="--pa:var(--amber);">
+								<li>The <b>six agents, the apps</b> (watch, phone, web) and the product design were my teammates&rsquo; work.</li>
+								<li>I used <b>NVIDIA&rsquo;s published 4-bit model</b>. I didn&rsquo;t shrink it myself.</li>
+								<li><b>I never benchmarked SGLang.</b> I wanted to, and I ran out of weekend.</li>
+								<li>The voice feature exists in the code but <b>wasn&rsquo;t part of what I deployed or measured</b>.</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">Guardian &mdash; 2 / 6</div>
+		</div>
+		<aside class="notes">
+			"I ran out of weekend before I could benchmark SGLang" is a better sentence than any claim
+			you could make about it. The reasoning-mode bug is the strongest story here: it only shows up
+			when you actually run the model, it was silent rather than loud, and the fix needed two layers
+			because the documented knob didn't work on that backend.
+		</aside>
+	</section>
+
+	<!-- 3.3 Architecture -->
+	<section>
+		<div class="slide">
+			<header class="slide-head tight">
+				<div class="kicker">Guardian <span class="sep">/</span> 03 System architecture</div>
+				<h2>One backend, three apps, and a single door every model call goes through</h2>
+			</header>
+			<div class="slide-body">
+				<div class="g-3-2 grow">
+					<!-- DIAGRAM: to swap in a final asset, replace this <pre class="mermaid"> with <img src="docs/guardian-arch.svg" alt="..."> -->
+					<figure class="diagram">
+						<div class="diagram-bar"><span class="t">System architecture</span><span class="id">fig-02 &middot; guardian-arch</span></div>
+						<div class="diagram-stage">
+<pre class="mermaid">
+flowchart TB
+  UI["Next.js dashboard"]
+  WATCH["Wear OS watch"]
+  FLUT["Flutter app"]
+
+  subgraph BE["GUARDIAN-BACKEND :8080 - model-agnostic"]
+    direction LR
+    API["FastAPI /turn"]
+    ROUTER["Hybrid router - keyword, then LLM"]
+    AGENTS["6 specialist agents - bounded tool loop"]
+    TOOLS["Tool registry"]
+    API --> ROUTER --> AGENTS --> TOOLS
+    TOOLS -.-> AGENTS
+  end
+
+  subgraph S["backend/llm - THE SEAM"]
+    direction LR
+    BASE["base.py - neutral DTOs + LLMClient Protocol"]
+    CFG["config.py - all LLM env config"]
+    FACT["factory.py - build_llm"]
+    ADP["openai_compatible.py - the only vendor import"]
+    BASE --> FACT
+    CFG --> FACT
+    FACT --> ADP
+  end
+
+  subgraph E["SERVING BACKENDS - swapped by config"]
+    direction LR
+    TRT["TensorRT-LLM :8000 - NVFP4 Nemotron 30B-A3B"]
+    OMNI["Omni multimodal :8001"]
+    CLOUD["OpenAI cloud"]
+  end
+
+  UI --> BE
+  WATCH --> BE
+  FLUT --> BE
+  BE --> S
+  S --> E
+</pre>
+						</div>
+						<figcaption class="diagram-cap"><b>Everything above the middle box works with any model.</b> The agents, tools and API never touch a vendor&rsquo;s objects, so switching engines is a config change.</figcaption>
+					</figure>
+
+					<div class="stack">
+						<div class="card flush">
+							<table class="ctab dense">
+								<thead><tr><th>Component</th><th>Responsibility</th></tr></thead>
+								<tbody>
+									<tr><td class="nm">Provider seam <span class="tech" style="font-weight:400;">LLMClient Protocol</span></td><td class="rsp">Our own data types, one adapter, one vendor import.</td></tr>
+									<tr><td class="nm">Inference engine <span class="tech" style="font-weight:400;">TRT-LLM AutoDeploy</span></td><td class="rsp">Serves the 4-bit model on an OpenAI-shaped port.</td></tr>
+									<tr><td class="nm">KV-cache budget <span class="tech" style="font-weight:400;">nano_v3_gb10.yaml</span></td><td class="rsp">Reserves <b>88 %</b> of free memory from the shared 121 GiB pool.</td></tr>
+									<tr><td class="nm">Hybrid router <span class="tech" style="font-weight:400;">LangGraph</span></td><td class="rsp">Checks keywords first, then asks the model to pick one of six agents.</td></tr>
+									<tr><td class="nm">Tool-loop agent <span class="tech" style="font-weight:400;">JSON-Schema ToolSpecs</span></td><td class="rsp">Runs tools and calls the model again, capped at 4 rounds.</td></tr>
+									<tr><td class="nm">Deployment <span class="tech" style="font-weight:400;">Compose + Tailscale</span></td><td class="rsp">Engine on host networking, app isolated, reachable over a private network.</td></tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="callout">
+							<div><span class="lead">Three deployment decisions worth 30 seconds each</span>
+								<b>The API runs on :8080</b> because the engine had already taken :8000. I fixed it in the port mapping, so neither service needed a config change.
+								<b>The engine gets direct host networking</b> so there&rsquo;s no extra network hop on every request; the app stays isolated.
+								<b>The address is a private-network IP</b>, because the browser runs on a different device and the URL is baked in at build time.</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">Guardian &mdash; 3 / 6</div>
+		</div>
+		<aside class="notes">
+			If they ask why base.py matters more than factory.py: the factory is where you choose an
+			adapter, but base.py is where you decide that a choice is *possible* — it's the DTO set that
+			makes two engines substitutable. The docstring invariant is the design.
+		</aside>
+	</section>
+
+	<!-- 3.4 Data flow -->
+	<section>
+		<div class="slide">
+			<header class="slide-head tight">
+				<div class="kicker">Guardian <span class="sep">/</span> 04 Execution &amp; data flow</div>
+				<h2>One utterance: <span class="muted" style="font-weight:400;">&ldquo;I feel a little dizzy. What should I do?&rdquo;</span></h2>
+			</header>
+			<div class="slide-body">
+				<ol class="flow grow">
+					<li><span class="n">1</span><div><div class="ttl">Ingress over Tailscale <span class="an">host port 8080</span></div>
+						<div class="dt">Dashboard, Flutter app or watch POSTs <code>{text, patient_id}</code> to the FastAPI turn endpoint. CORS admits Tailscale, LAN and localhost origins.</div></div></li>
+
+					<li><span class="n">2</span><div><div class="ttl">Turn setup and thread hop</div>
+						<div class="dt"><code>take_turn</code> publishes a <code>TranscriptEvent</code> <b>first</b>, so the Live page resets before any step streams; the synchronous graph is dispatched via <code>asyncio.to_thread</code> with a thread-safe <code>emit</code>.</div></div></li>
+
+					<li><span class="n">3</span><div><div class="ttl">Route &mdash; stage 1 <span class="an">zero model tokens</span></div>
+						<div class="dt">Keyword scan over a tuple of emergency phrases. A match reaches the Safety agent directly. &ldquo;Dizzy&rdquo; is not in it, so we fall through.</div></div></li>
+
+					<li><span class="n">4</span><div><div class="ttl">Route &mdash; stage 2 <span class="an">request #1 &middot; max_tokens 24 &middot; temperature 0.0</span></div>
+						<div class="dt">Model classification call. For non-OpenAI providers the adapter sets <code>enable_thinking=false</code> <b>and</b> prepends <code>/no_think</code> &mdash; without <i>both</i>, every turn silently degrades.</div></div></li>
+
+					<li><span class="n">5</span><div><div class="ttl">Agent prefill <span class="an">request #2</span></div>
+						<div class="dt">LangGraph&rsquo;s conditional edge selects the <code>health</code> node, which assembles <code>[system + patient context, *history, user]</code> and advertises its bound tool subset as JSON-Schema <code>ToolSpec</code>s.</div></div></li>
+
+					<li><span class="n">6</span><div><div class="ttl">Wire encode, then the engine <span class="an">KV pool preallocated at 88 % of free memory</span></div>
+						<div class="dt">Neutral DTOs &rarr; OpenAI wire format; POST crosses bridge &rarr; host. <b>Prefill</b> is compute-bound into paged KV blocks; <b>decode</b> is memory-bandwidth-bound, streaming ~1.5 GB of NVFP4 expert weights per step.</div></div></li>
+
+					<li><span class="n">7</span><div><div class="ttl">Parse and normalize <span class="an">one bad tool call degrades; the turn survives</span></div>
+						<div class="dt"><code>nano-v3</code> strips the thinking block, <code>qwen3_coder</code> lifts native tool syntax into OpenAI-shaped <code>tool_calls</code>. Malformed JSON is stashed as <code>{"_raw": ...}</code> rather than raised.</div></div></li>
+
+					<li><span class="n">8</span><div><div class="ttl">Tool execution and loop <span class="an">capped at MAX_TOOL_ROUNDS = 4</span></div>
+						<div class="dt"><code>registry.execute()</code> runs each function, <code>emit("tool_invocation")</code> fires per tool so the dashboard lights up live, results append as <code>role="tool"</code>, then back to step 5 with a longer prompt.</div></div></li>
+
+					<li><span class="n">9</span><div><div class="ttl">Egress <span class="an">2&ndash;5 sequential inference requests per user turn</span></div>
+						<div class="dt">Returns <code>{route, reply, tool_calls}</code>; an <code>AgentReplyEvent</code> streams to SSE subscribers.</div></div></li>
+				</ol>
+				<div class="note"><b>The ratio to internalize:</b> one user-visible turn is <b>2&ndash;5 sequential inference requests</b>, each with a longer prompt than the last.
+					That is the answer to &ldquo;why isn&rsquo;t turn latency just request latency?&rdquo; &mdash; and it is why the keyword fast-path in step 3 is worth having at all.</div>
+			</div>
+			<div class="crumb">Guardian &mdash; 4 / 6</div>
+		</div>
+		<aside class="notes">
+			Step 4 is the bug story's home. Emphasize that the failure was SILENT — empty content, no
+			exception, correct-looking HTTP 200, and every turn quietly routed to `companion`. That's the
+			class of bug that only integration against the real model finds.
+		</aside>
+	</section>
+
+	<!-- 3.5 Metrics -->
+	<section>
+		<div class="slide">
+			<header class="slide-head tight">
+				<div class="kicker">Guardian <span class="sep">/</span> 05 Metrics &amp; engineering impact</div>
+				<h2>What I can prove from the code &mdash; and what I never measured</h2>
+				<p class="dek">This was a weekend hackathon. <em>I&rsquo;d rather tell you where my evidence stops than give you a number that falls apart when you ask about it.</em></p>
+			</header>
+			<div class="slide-body">
+				<div class="g4">
+					<div class="metric"><div class="v">~16 <span class="u">GB</span></div><div class="l">NVFP4 checkpoint on disk</div><div class="d">down from ~60 GB at full precision. The maths and the docs agree, which is a good sign</div><span class="chip reproducible">from repo</span></div>
+					<div class="metric"><div class="v">121 <span class="u">GiB</span></div><div class="l">shared unified pool</div><div class="d">~92 GiB used with both models loaded, ~29 GiB left over</div><span class="chip reproducible">from repo</span></div>
+					<div class="metric"><div class="v">0.88</div><div class="l">KV-cache free-memory fraction</div><div class="d">Tuned so both models fit at once without running out of memory</div><span class="chip reproducible">from repo</span></div>
+					<div class="metric"><div class="v">600 <span class="u">s</span></div><div class="l">cold-start healthcheck budget</div><div class="d">40 retries. Loading the engine takes minutes, not seconds</div><span class="chip reproducible">from repo</span></div>
+				</div>
+
+				<div class="g2 grow">
+					<div class="card">
+						<div class="card-t">The bandwidth argument, as a model with stated assumptions</div>
+						<p style="font-size:15.5px;line-height:1.4;color:var(--muted);">Generating text is limited by memory speed, not compute. To write one word the machine reads the active weights from memory, so
+							<code>words/sec &asymp; memory speed &divide; bytes per word</code>. This box runs at <b>~273 GB/s</b>; an H100 gets ~3.35 TB/s. Assume ~70 % of peak.</p>
+						<table class="ctab">
+							<thead><tr><th>Precision</th><th>Bytes/token (3B active)</th><th>Ceiling @ ~190 GB/s</th></tr></thead>
+							<tbody>
+								<tr><td class="nm">BF16</td><td class="tech">~6 GB</td><td class="rsp">~30 tok/s</td></tr>
+								<tr><td class="nm">FP8</td><td class="tech">~3 GB</td><td class="rsp">~60 tok/s</td></tr>
+								<tr><td class="nm"><b>NVFP4</b></td><td class="tech"><b>~1.5 GB</b></td><td class="rsp"><b>~125 tok/s</b></td></tr>
+							</tbody>
+						</table>
+						<div class="note" style="background:var(--amber-soft);border-color:#fde68a;border-style:solid;">
+							<b>This is a calculation, not something I measured.</b> On this hardware, shrinking the model isn&rsquo;t a nice-to-have &mdash;
+							it&rsquo;s the difference between a demo that feels responsive and one that doesn&rsquo;t.
+						</div>
+					</div>
+
+					<div class="card" style="border-left:4px solid var(--muted);">
+						<div class="card-t neutral">The ledger I did not fill</div>
+						<p style="font-size:15.5px;line-height:1.42;color:var(--muted);">These aren&rsquo;t in the repo and I didn&rsquo;t log them, so I won&rsquo;t quote them:</p>
+						<div class="g2" style="gap:8px;">
+							<ul class="bul sm" style="--pa:var(--faint);">
+								<li>Batch-1 decode tok/s, per engine</li>
+								<li>TTFT, TRT-LLM vs. alternatives</li>
+								<li>End-to-end <code>/turn</code> p50 / p95</li>
+							</ul>
+							<ul class="bul sm" style="--pa:var(--faint);">
+								<li>Aggregate tok/s at concurrency 1&ndash;16</li>
+								<li>Peak resident memory, model vs. model + KV</li>
+								<li>Accuracy / perplexity deltas across precisions</li>
+							</ul>
+						</div>
+						<div class="callout" style="margin-top:auto;">
+							<div>What I <b>did</b> check: whether the model still called tools correctly, across a fixed set of test prompts. &ldquo;I didn&rsquo;t measure quality scores, but tool calls kept working after shrinking the model&rdquo;
+								is something I can defend. <b>A made-up &ldquo;847 ms down to 193 ms&rdquo; is not.</b></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">Guardian &mdash; 5 / 6</div>
+		</div>
+		<aside class="notes">
+			This slide is a deliberate bet: that a hiring manager values calibration over decoration.
+			Deliver it without apology — "hackathon, and I didn't instrument it; here's the model I
+			reasoned from and here's what I'd measure first on Monday." If they push for a number,
+			give the ceiling and label it a ceiling.
+		</aside>
+	</section>
+
+	<!-- 3.6 Trade-offs -->
+	<section>
+		<div class="slide">
+			<header class="slide-head tight">
+				<div class="kicker">Guardian <span class="sep">/</span> 06 Trade-offs &amp; learnings</div>
+				<h2>What I chose, what it cost me, and what broke</h2>
+			</header>
+			<div class="slide-body">
+				<div class="g3">
+					<div class="to">
+						<div class="axis">Model precision</div>
+						<div class="pick"><span class="yes">NVFP4</span><span class="vs">over</span><span class="no">FP8 / INT4 AWQ</span></div>
+						<p class="why">It reads <b>half as much memory as FP8</b> per word (4&times; less than full precision). And on this GPU the maths itself runs at 4-bit. Other 4-bit methods only shrink storage &mdash; they unpack back to 16-bit before multiplying, so you save memory but not compute.</p>
+						<p class="cost"><b>Cost:</b> some accuracy loss I couldn&rsquo;t put a number on, because I had no quality benchmark. FP8 was my fallback.</p>
+					</div>
+					<div class="to">
+						<div class="axis">Serving engine</div>
+						<div class="pick"><span class="yes">TensorRT-LLM</span><span class="vs">over</span><span class="no">Ollama / vLLM</span></div>
+						<p class="why">It had native 4-bit support for this GPU and handled several requests at once. Ollama was the easy baseline that proved the swap worked at all; vLLM was the sensible middle option.</p>
+						<p class="cost"><b>Cost:</b> a 10-minute startup, a pre-release build, and a backend that <b>ignored a documented setting</b>.</p>
+					</div>
+					<div class="to">
+						<div class="axis">Container networking</div>
+						<div class="pick"><span class="yes">Host for the engine, bridge for the app</span><span class="vs">over</span><span class="no">uniform bridge</span></div>
+						<p class="why">The engine skips a network translation step on every request. The app stays isolated and reaches back across. Two different setups on purpose, not by accident.</p>
+						<p class="cost"><b>Cost:</b> a port clash to sort out, and two networking styles to keep straight in one file.</p>
+					</div>
+				</div>
+
+				<div class="g-1-2 grow">
+					<div class="card tint">
+						<div class="card-t">The thing I most want to remember</div>
+						<p style="font-size:18px;line-height:1.5;">Matching an API&rsquo;s shape isn&rsquo;t the same as matching how it <b>behaves</b>.</p>
+						<p style="font-size:16px;line-height:1.45;color:var(--muted);">The format was identical and every response came back as a valid HTTP 200.
+							It still broke, because <b>the model spent its whole budget thinking</b> and returned nothing. No type check would have caught that.</p>
+					</div>
+					<div class="g2">
+						<div class="card">
+							<div class="card-t" style="color:var(--cyan);">Edge cases handled</div>
+							<ul class="risk edge">
+								<li><b>Broken JSON from a shrunk model.</b> Saved as raw text instead of throwing an error, so one bad tool call doesn&rsquo;t kill the whole reply.</li>
+								<li><b>Runaway tool loops.</b> Hard cap at <code>MAX_TOOL_ROUNDS = 4</code>.</li>
+								<li><b>One patient&rsquo;s data leaking into another&rsquo;s.</b> Switching patients reloads their profile and clears the conversation history.</li>
+								<li><b>The API address is fixed at build time.</b> Private-network IP first, local-wifi IP as backup &mdash; the browser runs on a different device than the server.</li>
+							</ul>
+						</div>
+						<div class="card">
+							<div class="card-t" style="color:var(--rose);">Failure modes mitigated</div>
+							<ul class="risk fail">
+								<li><b>The router silently falling back to a default</b> whenever the model started thinking &mdash; fixed in two places, because the documented setting didn&rsquo;t work.</li>
+								<li><b>Timeouts set for a cloud model.</b> Raised from 60 s to 120 s for the slower local one. That&rsquo;s a config value, not something I measured.</li>
+								<li><b>Re-downloading 16 GB with hours left on the clock.</b> The model cache lives outside the container, so rebuilding never re-downloads it.</li>
+								<li><b>Two models fighting over the same memory.</b> Capped up front at 88 %, rather than finding the limit by crashing.</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">Guardian &mdash; 6 / 6</div>
+		</div>
+		<aside class="notes">
+			The AWQ/GPTQ-vs-NVFP4 distinction is the highest-signal technical sentence in this project:
+			weight-only quantization saves bandwidth but dequantizes before the matmul, so tensor cores
+			still run at 16-bit rates. NVFP4 on Blackwell executes the GEMM at 4-bit. Say it once, cleanly.
+		</aside>
+	</section>
+
+</section>
 </div><!-- /.slides -->
 </div><!-- /.reveal -->
 
