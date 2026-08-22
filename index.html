@@ -668,6 +668,188 @@ flowchart TB
 		</aside>
 	</section>
 
+	<!-- 2.4 Data flow -->
+	<section>
+		<div class="slide">
+			<header class="slide-head tight">
+				<div class="kicker">OptiServe <span class="sep">/</span> 04 Execution &amp; data flow</div>
+				<h2>One workflow, from live Lambda measurements to a chosen configuration</h2>
+			</header>
+			<div class="slide-body">
+				<ol class="flow three grow">
+					<li><span class="n">1</span><div><div class="ttl">Capture before mutating <span class="an">900 s read timeout &middot; adaptive retries, max_attempts=10</span></div>
+						<div class="dt"><code>ConfigManager.managed()</code> issues <code>GetFunctionConfiguration</code> <b>before any mutation</b>, storing memory, timeout and <code>MODEL_NAME</code> for the <code>finally</code>.</div></div></li>
+
+					<li><span class="n">2</span><div><div class="ttl">Resume or seed <span class="an">run_id = function__model__sha256(params)[:12]</span></div>
+						<div class="dt"><code>Sampler.exploration_init()</code> checks the <code>CheckpointStore</code> for a matching parameter fingerprint; a hit restores samples <i>and</i> the pruned memory space.</div></div></li>
+
+					<li><span class="n">3</span><div><div class="ttl">Apply and verify a memory <span class="an">default space: 2,881 memory steps</span></div>
+						<div class="dt"><code>UpdateFunctionConfiguration</code>, block on the <code>function_updated</code> waiter, then <b>verify</b> memory and <code>MODEL_NAME</code> actually settled &mdash; a waiter returning is not convergence.</div></div></li>
+
+					<li><span class="n">4</span><div><div class="ttl">Measure the configuration <span class="an">extra samples while CV &gt; 5 %, up to 8</span></div>
+						<div class="dt"><code>Explorer</code> fires one throwaway invocation to force a cold start, then fans out N concurrent invokes through a <code>ThreadPoolExecutor</code>.</div></div></li>
+
+					<li><span class="n">5</span><div><div class="ttl">Parse and type failures <span class="an">markers first, numeric check as second signal</span></div>
+						<div class="dt">Extracts <code>Billed Duration</code> from both the text <code>REPORT</code> line and the JSON <code>platform.report</code>, raising typed <code>FunctionTimeout</code> / <code>NotEnoughMemory</code>.</div></div></li>
+
+					<li><span class="n">6</span><div><div class="ttl">Fit, then pick the next memory <span class="an">&sigma; = 200 MB &middot; converges in ~5&ndash;20 configurations</span></div>
+						<div class="dt"><code>Objective</code> adds a Gaussian bump, <code>ParamFunction</code> refits <code>rt(m)=a₀+a₁e^(−m/a₂)</code> warm-started, then <code>argmin(cost &times; knowledge)</code> over the live space.</div></div></li>
+
+					<li class="flow-phase" style="grid-column:1/-1;">&darr; the seam &mdash; below this line there is no AWS, no randomness, no I/O</li>
+
+					<li><span class="n">7</span><div><div class="ttl">Cross the seam <span class="an">App3: 3 nodes &middot; 1/4/4 variants &middot; 16/16/10 steps</span></div>
+						<div class="dt"><code>add_ml_function</code> evaluates every variant&rsquo;s curve at every grid point into <code>perf_profile[variant][memory]</code>.</div></div></li>
+
+					<li><span class="n">8</span><div><div class="ttl">Model the application <span class="an">SFN overhead 18.81 ms/state, 1 ms/edge</span></div>
+						<div class="dt"><b>Copies</b> the graph, de-loops with <code>update_ne</code> (self-loops &rarr; <code>ne/(1−p)</code>), reduces to a simple DAG, then evaluates latency and cost. <b>Memoization is opt-in.</b></div></div></li>
+
+					<li><span class="n">9</span><div><div class="ttl">Optimize, then score against truth <span class="an">greedy result vs. brute-forced ground truth</span></div>
+						<div class="dt">Four corner configurations give the feasible envelope; greedy PRCP returns an <code>OptimizationResult</code>, which the evaluation harness scores against the brute-forced CSV.</div></div></li>
+				</ol>
+				<div class="note" style="flex:0 0 auto;"><b>The steps are the architecture.</b> Steps 1&ndash;6 change a real AWS account, cost money, and give slightly different numbers each time.
+					Steps 7&ndash;9 touch nothing, cost nothing, and give identical results every time. <b>Anything I could make repeatable, I moved past step&nbsp;7</b> &mdash; which is why the tests and the published numbers can be reproduced.</div>
+			</div>
+			<div class="crumb">OptiServe &mdash; 4 / 6</div>
+		</div>
+		<aside class="notes">
+			Step 3 is the one to linger on — "a waiter returning is not the same as convergence" is a
+			real distributed-systems lesson and it came from a real bug. Step 1's eager capture plus the
+			finally is the answer to "what happens if it crashes mid-sweep": the customer's function is
+			restored exactly as found, including removing MODEL_NAME if it wasn't there.
+		</aside>
+	</section>
+
+	<!-- 2.5 Metrics -->
+	<section>
+		<div class="slide">
+			<header class="slide-head tight">
+				<div class="kicker">OptiServe <span class="sep">/</span> 05 Metrics &amp; engineering impact</div>
+				<h2>Every number here is in the repo, or you can re-run the command that produced it</h2>
+			</header>
+			<div class="slide-body">
+				<div class="g4">
+					<div class="metric"><div class="v">~1,300&times;</div><div class="l">acquisition-function speed-up</div><div class="d"><code>update_knowledge</code> 0.71 s &rarr; 0.0005 s, <b>bit-identical</b> output</div><span class="chip measured">measured</span></div>
+					<div class="metric"><div class="v">2.99&times;</div><div class="l">memoized three-strategy run</div><div class="d">App3 420 &rarr; 141 ms, byte-identical CSV. <b>Opt-in; off by default</b></div><span class="chip measured">measured</span></div>
+					<div class="metric"><div class="v">~14,000</div><div class="l">control-plane calls removed</div><div class="d">Avoidable AWS API calls on a 2,881-step sweep</div><span class="chip measured">measured</span></div>
+					<div class="metric"><div class="v">0 &rarr; 76&ndash;100<span class="u">%</span></div><div class="l">coverage of <code>optiserve/aws/</code></div><div class="d">Repo total 73 &rarr; <b>85 % with integration</b>, 80 % offline; CI floor 75 %</div><span class="chip measured">measured</span></div>
+				</div>
+
+				<div class="g-3-2 grow">
+					<div class="card">
+						<div class="card-t neutral">Optimizer quality &mdash; greedy vs. brute-forced ground truth, from the committed <code>App*_accuracy.npy</code></div>
+						<table class="ctab">
+							<thead><tr><th>Strategy</th><th>n</th><th>Mean</th><th>Exactly optimal</th><th>5th pct</th><th>Worst</th></tr></thead>
+							<tbody>
+								<tr><td class="nm">BCPC <span class="muted" style="font-weight:400;">min cost</span></td><td class="tech">852</td><td class="rsp"><b>98.62 %</b></td><td class="rsp">92.3 %</td><td class="rsp">98.3 %</td><td class="rsp">63.2 %</td></tr>
+								<tr><td class="nm">BPBC <span class="muted" style="font-weight:400;">min latency</span></td><td class="tech">554</td><td class="rsp"><b>96.77 %</b></td><td class="rsp">73.8 %</td><td class="rsp">86.2 %</td><td class="rsp">45.6 %</td></tr>
+								<tr><td class="nm">BAPB <span class="muted" style="font-weight:400;">max accuracy</span></td><td class="tech">952</td><td class="rsp"><b>95.67 %</b></td><td class="rsp">78.9 %</td><td class="rsp">72.7 %</td><td class="rsp"><b style="color:var(--rose);">0.0 %</b></td></tr>
+							</tbody>
+						</table>
+						<div class="note" style="border-style:solid;border-color:var(--line);background:var(--surface-2);">
+							<b>I point at the worst-case column on purpose.</b> One strategy scores 0&nbsp;% on one test case. That number is the reason to trust the rest:
+							it means I actually looked. It also tells me which strategy I&rsquo;d ship as-is (<b>BCPC</b>) and which I&rsquo;d put a guard on (<b>BAPB</b>).
+						</div>
+					</div>
+
+					<div class="stack">
+						<div class="card">
+							<div class="card-t">Where the time actually went</div>
+							<ul class="bul sm">
+								<li>One function was <b>77 % of the total runtime</b>. Over half of that only depended on the pipeline&rsquo;s shape, not its numbers &mdash; which is why caching on shape alone was safe.</li>
+								<li>I don&rsquo;t just claim the search is good. The repo <b>checks every option the slow way</b> and measures how far off the fast way was.</li>
+								<li><b>155 tests</b> &mdash; 137 offline (incl. 8 golden-master) + 18 integration, the latter run <b>twice</b>: in-process <code>moto</code>, then <code>moto-server</code> over HTTP.</li>
+							</ul>
+						</div>
+						<div class="card" style="border-left:4px solid var(--muted);">
+							<div class="card-t neutral">Stated limits</div>
+							<ul class="bul sm" style="--pa:var(--muted);">
+								<li>The benchmark&rsquo;s measured curves <b>aren&rsquo;t in the repo and can&rsquo;t be regenerated without live AWS</b>. The results are committed; a fresh clone can&rsquo;t reproduce them from scratch.</li>
+								<li>This never ran in production and never served real traffic. It&rsquo;s a research project with a good test suite, not a live service.</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">OptiServe &mdash; 5 / 6</div>
+		</div>
+		<aside class="notes">
+			The 1,300x number invites "so your profiler was slow?" — the honest answer is yes, and the
+			fix was replacing a Python loop with a NumPy kernel, verified bit-identical. Bit-identical is
+			the part that matters: a speed-up that changes the answer is not a speed-up.
+			If they ask about the 0% worst case: it's one App1 constraint point where the greedy first
+			phase saturates the accuracy constraint and leaves nothing to spend.
+		</aside>
+	</section>
+
+	<!-- 2.6 Trade-offs -->
+	<section>
+		<div class="slide">
+			<header class="slide-head tight">
+				<div class="kicker">OptiServe <span class="sep">/</span> 06 Trade-offs &amp; learnings</div>
+				<h2>What I chose, what it cost me, and what broke</h2>
+			</header>
+			<div class="slide-body">
+				<div class="g3">
+					<div class="to">
+						<div class="axis">How to search</div>
+						<div class="pick"><span class="yes">Greedy critical-path (PRCP)</span><span class="vs">over</span><span class="no">exhaustive / ILP / Bayesian</span></div>
+						<p class="why">Checking everything means 10<sup>17</sup> options on a ten-step pipeline. The greedy approach is also <b>easy to explain</b>: you can point at which step got the next MB, and why.</p>
+						<p class="cost"><b>Cost:</b> no optimality guarantee. Paid for by brute-forcing ground truth and publishing the gap, tail included.</p>
+					</div>
+					<div class="to">
+						<div class="axis">Where to split the system</div>
+						<div class="pick"><span class="yes">One bridge method</span><span class="vs">over</span><span class="no">a live-AWS optimizer</span></div>
+						<p class="why">Keeping everything unpredictable on one side of that method makes the other side <b>give identical results every run, and free to test</b>.</p>
+						<p class="cost"><b>Cost:</b> the discrete memory grid loses resolution the continuous curve had.</p>
+					</div>
+					<div class="to">
+						<div class="axis">Fixing bugs vs. keeping results comparable</div>
+						<div class="pick"><span class="yes">Named compat flags</span><span class="vs">over</span><span class="no">just fixing it</span></div>
+						<p class="why">I found two bugs I couldn&rsquo;t just fix. Fixing them changed numbers that my tests had locked in. So each one became a <b>named on/off switch</b>, with saved results for both settings. A test checks the two results really are different, so a switch can never quietly stop doing anything.</p>
+						<p class="cost"><b>Cost:</b> two code paths forever; <b>two flags are still declared but ungated</b>.</p>
+					</div>
+				</div>
+
+				<div class="g-1-2 grow">
+					<div class="card tint">
+						<div class="card-t">The thing I most want to remember</div>
+						<p style="font-size:18px;line-height:1.5;">A cache that returns an <b>almost right</b> number is worse than no cache at all.</p>
+						<p style="font-size:16px;line-height:1.45;color:var(--muted);">So the cache key uses the <b>exact numbers</b>, never rounded ones. If someone is going to publish your output,
+							a tiny difference that only shows up when caching is on is a bug you will never track down.</p>
+					</div>
+					<div class="g2">
+						<div class="card">
+							<div class="card-t" style="color:var(--cyan);">Edge cases handled</div>
+							<ul class="risk edge">
+								<li><b>Settings that can&rsquo;t work.</b> If a run hits out-of-memory or a timeout, that memory size becomes the new minimum. It never tries that range again.</li>
+								<li><b>Cold starts skewing results.</b> One throwaway call per setting absorbs the cold start, so the measurements that count are all warm and comparable.</li>
+								<li><b>Loops and retries.</b> Worked out with a formula for how many times each step runs on average, instead of simulating them.</li>
+								<li><b>AWS saying &ldquo;done&rdquo; isn&rsquo;t done.</b> After AWS reports the update finished, I read the settings back and check they actually changed.</li>
+							</ul>
+						</div>
+						<div class="card">
+							<div class="card-t" style="color:var(--rose);">Failure modes mitigated</div>
+							<ul class="risk fail">
+								<li><b>A crash leaving someone&rsquo;s function modified.</b> Settings are saved up front and restored on every exit path, including being killed.</li>
+								<li><b>Getting rate-limited by AWS.</b> The client slows itself down before AWS has to say no.</li>
+								<li><b>Quietly mixing results from different settings.</b> The saved-progress key includes the settings, so changing one starts a new run.</li>
+								<li><b>Logging breaking the thing it&rsquo;s logging.</b> If writing an event fails, the run carries on regardless.</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">OptiServe &mdash; 6 / 6</div>
+		</div>
+		<aside class="notes">
+			The compat-flag story is the strongest single anecdote in this project — it shows you
+			understand that in a system producing published numbers, "correct" and "comparable" are
+			different requirements and you may have to serve both. Be ready for "why not just version
+			the output?" — answer: because the golden battery is what proves the flag still does
+			something, and a version number doesn't assert that.
+		</aside>
+	</section>
+
 </section>
 </div><!-- /.slides -->
 </div><!-- /.reveal -->
