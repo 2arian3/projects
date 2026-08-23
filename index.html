@@ -1716,6 +1716,233 @@ flowchart TB
 	</section>
 
 </section>
+<!-- =====================================================================
+     SECTION 5 — APPLIED TO EVENUP + CLOSE
+     ===================================================================== -->
+<section class="proj-d">
+
+	<!-- 5.0 opener -->
+	<section>
+		<div class="hero">
+			<div class="sec-no">04</div>
+			<div class="eyebrow" style="margin-top:16px;">Synthesis</div>
+			<h1 style="margin-top:12px;font-size:64px;">Applied to EvenUp</h1>
+			<div class="rule"></div>
+			<p class="sub">Three projects, three habits I&rsquo;d bring with me. Here is how I&rsquo;d apply them to a
+				pipeline that turns a pile of medical records into structured data you can defend &mdash;
+				and where I&rsquo;d expect to be wrong.</p>
+		</div>
+		<aside class="notes">
+			Transition: "That's the portfolio. I'd rather spend the rest of the time on your problem
+			than on mine." This is the section where you want them interrupting.
+		</aside>
+	</section>
+
+	<!-- 5.1 common threads -->
+	<section>
+		<div class="slide">
+			<header class="slide-head">
+				<div class="kicker">Synthesis <span class="sep">/</span> 01</div>
+				<h2>Three projects, three habits worth keeping</h2>
+			</header>
+			<div class="slide-body">
+				<div class="g3 grow">
+					<div class="card rail">
+						<div class="card-t"><span class="n">1</span> Keep the model behind one door</div>
+						<p style="font-size:16.5px;line-height:1.45;">In each project, the slow and unpredictable part sits behind one small interface.</p>
+						<ul class="bul sm">
+							<li><b>OptiServe:</b> all of AWS is 9 operations in one folder. Nothing outside it talks to AWS.</li>
+							<li><b>Guardian:</b> exactly one file imports a vendor library, so moving from cloud to local was a config edit.</li>
+							<li><b>BakeryPilot:</b> the agent is just another API client. No direct database access, no special privileges.</li>
+						</ul>
+						<div class="note" style="margin-top:auto;"><b>Why it pays off:</b> 137 of OptiServe&rsquo;s 155 tests run with no internet. Easy testing is the reward, not the reason.</div>
+					</div>
+					<div class="card rail">
+						<div class="card-t"><span class="n">2</span> Measure first, then optimize</div>
+						<p style="font-size:16.5px;line-height:1.45;">Every performance claim in this deck comes from a command you could re-run yourself.</p>
+						<ul class="bul sm">
+							<li>OptiServe <b>checks every option the slow way</b>, so the 96&ndash;99&nbsp;% figure is measured, not claimed.</li>
+							<li>The 2.99&times; speed-up came after profiling showed one function was <b>77&nbsp;% of the runtime</b>.</li>
+							<li>Where I never measured something &mdash; Guardian&rsquo;s speed &mdash; this deck says so instead of making a number up.</li>
+						</ul>
+						<div class="note" style="margin-top:auto;"><b>Why it pays off:</b> a number that falls apart under one follow-up question costs more than it was ever worth.</div>
+					</div>
+					<div class="card rail">
+						<div class="card-t"><span class="n">3</span> Make the answer checkable</div>
+						<p style="font-size:16.5px;line-height:1.45;">In all three, the output outlives the run that produced it. Someone will ask about it later.</p>
+						<ul class="bul sm">
+							<li>OptiServe caches on <b>exact numbers</b>, never rounded ones. An almost-right cached answer is worse than no cache.</li>
+							<li>BakeryPilot blocks edits to history <b>in the database itself</b>, not in application code.</li>
+							<li>Forecasts record which model version made them, so v3&rsquo;s answers stay reproducible after v4 ships.</li>
+						</ul>
+						<div class="note" style="margin-top:auto;"><b>Why it pays off:</b> it&rsquo;s what a legal document needs &mdash; who claimed what, from which page, using which model.</div>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">Synthesis &mdash; 1 / 3</div>
+		</div>
+		<aside class="notes">
+			If you only get one slide from this section, make it this one. The third column is the
+			one that connects directly to their "prove it in court" problem — lead with it if they're a
+			product-minded manager rather than an infra one.
+		</aside>
+	</section>
+
+	<!-- 5.2 the design -->
+	<section>
+		<div class="slide">
+			<header class="slide-head tight">
+				<div class="kicker">Synthesis <span class="sep">/</span> 02</div>
+				<h2>Raw medical records &rarr; structured extractions</h2>
+				<p class="dek">Assume a background job with hours to finish, messy scanned PDFs, and a human reviewing before delivery. <em>Speed is not the hard part.</em></p>
+			</header>
+			<div class="slide-body">
+				<div class="g-3-2 grow">
+					<!-- DIAGRAM: swap in a final asset by replacing the <pre class="mermaid"> block with <img src="docs/evenup-pipeline.svg" alt="..."> -->
+					<figure class="diagram">
+						<div class="diagram-bar"><span class="t">Proposed pipeline</span><span class="id">fig-04 &middot; evenup-extraction</span></div>
+						<div class="diagram-stage">
+<pre class="mermaid">
+flowchart TB
+  UP["Client upload"] --> S3R["S3 raw - immutable - key is sha256 of bytes"]
+
+  subgraph ORCH["DURABLE ORCHESTRATION - per case"]
+    direction LR
+    SF["Step Functions or Temporal"] --> SPL["Split + normalize - 1 page = 1 task"]
+  end
+
+  subgraph STG["PER-PAGE STAGES - a queue between each"]
+    direction LR
+    CLS["Classify doc type - cheap model"]
+    OCR["OCR - bypassed if digital text exists"]
+    EXT["Extract - per-doc-type schema"]
+    SUM["Summarize - one pass per case"]
+    CLS --> OCR --> EXT --> SUM
+  end
+
+  subgraph SOR["SYSTEM OF RECORD"]
+    direction LR
+    PG["Postgres facts + provenance - append only, versioned"]
+    DLQ["Dead letter queue - case goes partially complete"]
+  end
+
+  REV["Human review - sampled + low confidence"] --> ASM["Demand package assembly"]
+
+  S3R --> ORCH
+  ORCH --> STG
+  STG --> SOR
+  STG -.->|"N failures"| DLQ
+  SOR --> REV
+</pre>
+						</div>
+						<figcaption class="diagram-cap"><b>Process one page at a time, not one case at a time.</b> If page 3,700 of 4,000 fails, you lose one page &mdash; not the whole case.</figcaption>
+					</figure>
+
+					<div class="stack">
+						<div class="card">
+							<div class="card-t"><span class="n">1</span> Name every file by its contents</div>
+							<p style="font-size:16px;line-height:1.45;">Store each page under a hash of its own bytes. Duplicates disappear for free &mdash; the same record from three providers is stored once &mdash; and
+								that hash plus the stage and model version becomes a natural key for &ldquo;have we already done this?&rdquo;</p>
+						</div>
+						<div class="card">
+							<div class="card-t"><span class="n">2</span> Make skipping work its own step</div>
+							<p style="font-size:16px;line-height:1.45;">Plenty of &ldquo;scanned&rdquo; records already have real text in them. A cheap check that sends those straight past OCR is the highest-value box in the diagram.
+								<b>Then do the same thing one step later:</b> use the small model by default, and only call the big one when confidence is low.</p>
+						</div>
+						<div class="card tint">
+							<div class="card-t">This is OptiServe&rsquo;s idea, applied here</div>
+							<p style="font-size:16px;line-height:1.45;">Pick a different model per step, trading speed against cost against accuracy &mdash; and spend your effort on the step that actually moves the total,
+								not evenly across all of them.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">Synthesis &mdash; 2 / 3</div>
+		</div>
+		<aside class="notes">
+			Spend the first sentences clarifying, not designing: interactive or background? one merged
+			PDF or many files? human review before or after delivery? per-field or per-document accuracy bar?
+			Then name the hard part out loud: (a) a 4,000-page case failing at page 3,700 must not restart;
+			(b) every fact must be traceable to a source page or it is worthless in a legal document;
+			(c) cost is dominated by which model runs on which page, not by infrastructure.
+			Queue-between-every-stage gives backpressure free and isolates poison pills. Avoid Airflow —
+			it is built for scheduled batch DAGs, not 100k concurrent per-entity workflows.
+		</aside>
+	</section>
+
+	<!-- 5.3 pushback -->
+	<section>
+		<div class="slide">
+			<header class="slide-head">
+				<div class="kicker">Synthesis <span class="sep">/</span> 03</div>
+				<h2>The questions I&rsquo;d expect you to ask</h2>
+				<p class="dek">Four places this design has to hold up, and how I&rsquo;d answer.</p>
+			</header>
+			<div class="slide-body">
+				<div class="g2 grow">
+					<div class="card rail">
+						<div class="card-t">&ldquo;How do you guarantee exactly-once?&rdquo;</div>
+						<p style="font-size:16.5px;line-height:1.45;"><b>You don&rsquo;t &mdash; and that&rsquo;s the right answer.</b> You can&rsquo;t guarantee a message is <i>delivered</i> exactly once over a network. You can guarantee it has the
+							<i>same effect</i> once: deliver at least once, and make each step safe to repeat. Every stage writes under the same key, so a repeat just overwrites with identical data.</p>
+						<div class="note"><b>The one place to be careful</b> is the AI call itself. It&rsquo;s expensive, so check whether you already have the answer <i>before</i> making it.</div>
+					</div>
+					<div class="card rail">
+						<div class="card-t">&ldquo;One stage is 10&times; slower than the rest.&rdquo;</div>
+						<p style="font-size:16.5px;line-height:1.45;">Start by measuring, not guessing. <b>Queue length</b> and <b>how old the oldest item is</b> tell you exactly where the backlog sits.
+							Then fix that one stage: more workers if it&rsquo;s waiting on I/O, batching if the per-call overhead dominates, a cheaper model if it&rsquo;s cost.</p>
+						<div class="note"><b>Don&rsquo;t</b> scale the whole pipeline evenly. That&rsquo;s exactly the mistake OptiServe&rsquo;s search exists to avoid.</div>
+					</div>
+					<div class="card rail">
+						<div class="card-t">&ldquo;The LLM provider has an outage.&rdquo;</div>
+						<p style="font-size:16.5px;line-height:1.45;">Stop calling the broken provider, switch to a backup or a smaller local model, and <b>record which model actually did the work</b>,
+							so your quality numbers don&rsquo;t quietly mix two different models together.</p>
+						<div class="note">If you have hours to finish, <b>the queue absorbs a 20-minute outage completely</b>. That&rsquo;s the main reason to use queues here instead of direct calls.</div>
+					</div>
+					<div class="card rail">
+						<div class="card-t">&ldquo;How do you control cost?&rdquo;</div>
+						<p style="font-size:16.5px;line-height:1.45;">Three levers, biggest first: <b>(1) don&rsquo;t do the work at all</b> &mdash; skip duplicates and pages that already have text;
+							<b>(2) use the smallest model that works</b> for each page; <b>(3) cache on the content hash</b>, because the same forms show up again and again across cases.</p>
+						<div class="note">Then track <b>cost per case next to quality, with the model version attached</b> &mdash; so an accuracy win that doubles your bill shows up on the same dashboard.</div>
+					</div>
+				</div>
+			</div>
+			<div class="crumb">Synthesis &mdash; 3 / 3</div>
+		</div>
+		<aside class="notes">
+			These four are the most likely deep-dives. The "you don't guarantee exactly-once" answer is
+			the highest-signal thing you can say in this whole section — deliver it flatly and without
+			hedging, then immediately explain the key that makes repeats safe.
+		</aside>
+	</section>
+
+</section>
+
+<!-- =====================================================================
+     SECTION 6 — CLOSE
+     ===================================================================== -->
+<section>
+	<div class="hero">
+		<div class="eyebrow">Thank you</div>
+		<h1 style="margin-top:16px;font-size:60px;">What I&rsquo;d like<br>to ask you.</h1>
+		<div class="rule"></div>
+		<div class="g2" style="max-width:1160px;gap:14px;">
+			<div class="card"><p style="font-size:17px;line-height:1.45;">How do you pick <b>which model runs at each step</b> today? Is the quality-vs-cost trade-off measured, or decided by judgement?</p></div>
+			<div class="card"><p style="font-size:17px;line-height:1.45;">When a model improves, how do you keep this quarter&rsquo;s quality numbers <b>comparable to last quarter&rsquo;s</b>?</p></div>
+			<div class="card"><p style="font-size:17px;line-height:1.45;">Where does the document pipeline <b>actually get stuck</b> today &mdash; ingestion, the model, or human review?</p></div>
+			<div class="card"><p style="font-size:17px;line-height:1.45;">What&rsquo;s the split between <b>serverless functions and long-running workers</b>, and what drove that choice?</p></div>
+		</div>
+		<div class="idcard" style="margin-top:34px;">
+			<span><b>Arian Boukani</b></span><span class="dot"></span>
+			<span class="mono">2arian3.github.io</span><span class="dot"></span>
+			<span class="mono">github.com/2arian3</span><span class="dot"></span>
+			<span class="muted">Deck: <span class="mono">2arian3.github.io/projects</span></span>
+		</div>
+	</div>
+	<aside class="notes">
+		Ask three, not four. The versioning/compat question is the one that signals you think about
+		data products as systems rather than features — lead with it.
+	</aside>
+</section>
 </div><!-- /.slides -->
 </div><!-- /.reveal -->
 
