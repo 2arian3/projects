@@ -2,1959 +2,1205 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Arian Boukani — Engineering Portfolio</title>
+	<title>Arian Boukani · Engineering Portfolio</title>
 
-	<meta name="description" content="Systems engineering portfolio: OptiServe, Guardian on DGX Spark, BakeryPilot.">
+	<meta name="description" content="Engineering portfolio: SevenTask, OptiServe, Guardian, Realest, BakeryPilot.">
 	<meta name="author" content="Arian Boukani">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="theme-color" content="#f8fafc">
 
+	<!-- Pick a canvas before first paint (see RESPONSIVE CANVAS in the CSS). -->
+	<script>
+	window.deckPickMode = function () {
+	  if (/print-pdf/i.test(window.location.search)) return 'landscape';
+	  var w = window.innerWidth, h = window.innerHeight;
+	  if (w < h) return 'portrait';     /* phones and tablets held upright */
+	  if (h < 500) return 'compact';    /* phones held sideways */
+	  return 'landscape';               /* laptops and desktops */
+	};
+	document.documentElement.classList.add('deck-' + window.deckPickMode());
+	</script>
+
 	<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230f172a'/%3E%3Cpath d='M28 68 L50 30 L72 68' stroke='%2338bdf8' stroke-width='9' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 
-	<!-- ==== Reveal.js 5.2.1 (CDN, classic scripts — no ES-module/CORS constraints) ==== -->
+	<!-- ==== Reveal.js 5.2.1 (CDN, classic scripts) ==== -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.2.1/reveal.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.2.1/theme/white.min.css" id="theme">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/github.min.css">
 
 <style>
 /* =====================================================================
-   DESIGN TOKENS — light legal-tech palette. Change these, change the deck.
+   DESIGN TOKENS
    ===================================================================== */
 :root{
-  --bg:#f8fafc; --surface:#ffffff; --surface-2:#f1f5f9; --surface-3:#e9eff7;
+  --bg:#f8fafc; --surface:#ffffff; --surface-2:#f1f5f9;
   --ink:#0f172a; --ink-2:#1e293b; --body:#334155; --muted:#64748b; --faint:#94a3b8;
   --line:#e2e8f0; --line-2:#cbd5e1;
 
   --accent:#2563eb; --accent-deep:#1d4ed8; --accent-soft:#eff6ff;
-  --cyan:#0284c7;  --cyan-soft:#e0f2fe;
-  --teal:#0d9488;  --teal-soft:#ccfbf1;
-  --amber:#b45309; --amber-soft:#fef3c7;
-  --green:#047857; --green-soft:#d1fae5;
-  --rose:#be123c;  --rose-soft:#ffe4e6;
-  --violet:#6d28d9;--violet-soft:#ede9fe;
+  --cyan:#0284c7;   --cyan-soft:#e0f2fe;
+  --teal:#0d9488;   --teal-soft:#ccfbf1;
+  --violet:#6d28d9; --violet-soft:#ede9fe;
+  --amber:#b45309;  --amber-soft:#fef3c7;
 
-  --r:14px; --r-sm:9px; --r-xs:6px;
-  --sh:0 1px 2px rgba(15,23,42,.05), 0 8px 20px -12px rgba(15,23,42,.18);
-  --sh-lg:0 2px 4px rgba(15,23,42,.04), 0 18px 40px -20px rgba(15,23,42,.28);
+  --r:20px; --r-sm:14px;
+  --sh:0 1px 2px rgba(15,23,42,.05), 0 14px 34px -18px rgba(15,23,42,.24);
 
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;
   --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
 }
 
-/* Per-project accent — set on the outer section element via class */
-.proj-a{--pa:var(--accent); --pa-soft:var(--accent-soft); --pa-deep:var(--accent-deep);}
-.proj-b{--pa:var(--cyan);   --pa-soft:var(--cyan-soft);   --pa-deep:#0369a1;}
-.proj-c{--pa:var(--teal);   --pa-soft:var(--teal-soft);   --pa-deep:#0f766e;}
-.proj-d{--pa:var(--violet); --pa-soft:var(--violet-soft); --pa-deep:#5b21b6;}
-.reveal .slides section{--pa:var(--accent); --pa-soft:var(--accent-soft); --pa-deep:var(--accent-deep);}
-.proj-a > section{--pa:var(--accent); --pa-soft:var(--accent-soft); --pa-deep:var(--accent-deep);}
-.proj-b > section{--pa:var(--cyan);   --pa-soft:var(--cyan-soft);   --pa-deep:#0369a1;}
-.proj-c > section{--pa:var(--teal);   --pa-soft:var(--teal-soft);   --pa-deep:#0f766e;}
-.proj-d > section{--pa:var(--violet); --pa-soft:var(--violet-soft); --pa-deep:#5b21b6;}
+/* Per-project accent. Custom properties inherit, so set once per section. */
+.reveal{--pa:var(--accent); --pa-soft:var(--accent-soft); --pa-deep:var(--accent-deep);}
+.reveal .proj-a{--pa:var(--accent); --pa-soft:var(--accent-soft); --pa-deep:var(--accent-deep);}
+.reveal .proj-b{--pa:var(--cyan);   --pa-soft:var(--cyan-soft);   --pa-deep:#0369a1;}
+.reveal .proj-c{--pa:var(--teal);   --pa-soft:var(--teal-soft);   --pa-deep:#0f766e;}
+.reveal .proj-d{--pa:var(--violet); --pa-soft:var(--violet-soft); --pa-deep:#5b21b6;}
+.reveal .proj-e{--pa:var(--amber);  --pa-soft:var(--amber-soft);  --pa-deep:#92400e;}
 
 /* =====================================================================
-   REVEAL BASE OVERRIDES
+   REVEAL BASE
    ===================================================================== */
 html,body{background:var(--bg);}
 .reveal-viewport{background:var(--bg);}
-.reveal{font-family:var(--sans);font-size:22px;font-weight:400;color:var(--body);
+.reveal{font-family:var(--sans);font-size:24px;font-weight:400;color:var(--body);
         -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
 .reveal .slides{text-align:left;}
-.reveal .slides section{padding:0;}   /* no height:100% — it resolves to 0 in ?print-pdf view */
-.reveal h1,.reveal h2,.reveal h3,.reveal h4,.reveal h5{
-  color:var(--ink);font-family:var(--sans);font-weight:700;
-  letter-spacing:-.022em;text-transform:none;text-shadow:none;margin:0;line-height:1.14;}
-.reveal p{margin:0;line-height:1.5;}
+.reveal .slides section{padding:0;}   /* no height:100% - it resolves to 0 in ?print-pdf view */
+.reveal h1,.reveal h2,.reveal h3{color:var(--ink);font-family:var(--sans);font-weight:750;
+  letter-spacing:-.032em;text-transform:none;text-shadow:none;margin:0;line-height:1.06;}
+.reveal p{margin:0;line-height:1.4;}
 .reveal ul,.reveal ol{margin:0;padding:0;list-style:none;}
-.reveal a{color:var(--accent-deep);text-decoration:none;border-bottom:1px solid #bfdbfe;}
-.reveal a:hover{color:var(--accent);border-bottom-color:var(--accent);}
-.reveal strong,.reveal b{color:var(--ink);font-weight:650;}
-.reveal code{font-family:var(--mono);font-size:.9em;background:var(--surface-2);
-  border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:var(--ink-2);}
-.reveal .progress{color:var(--accent);height:4px;}
-.reveal .controls{color:var(--accent);}
-.reveal .slide-number{background:rgba(15,23,42,.72);color:#fff;font-family:var(--mono);
-  font-size:13px;border-radius:6px;padding:4px 9px;right:14px;bottom:14px;}
+.reveal .progress{color:var(--accent);height:3px;}
+.reveal .slide-number{background:transparent;color:var(--faint);font-family:var(--mono);
+  font-size:14px;right:22px;bottom:16px;}
 .reveal ::selection{background:#bfdbfe;color:var(--ink);}
+.mono{font-family:var(--mono);}
 
 /* =====================================================================
-   SLIDE SCAFFOLD
+   LAYOUTS
    ===================================================================== */
-.slide{display:flex;flex-direction:column;height:830px;padding:34px 46px 30px;box-sizing:border-box;}
-.slide.center{justify-content:center;}
-.slide-head{flex:0 0 auto;margin-bottom:20px;}
-.slide-head.tight{margin-bottom:14px;}
-.slide-body{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:14px;}
-
-.kicker{display:inline-flex;align-items:center;gap:9px;font-size:13px;font-weight:700;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--pa-deep);margin-bottom:11px;}
-.kicker::before{content:"";width:16px;height:3px;border-radius:2px;background:var(--pa);}
-.kicker .sep{color:var(--faint);font-weight:600;letter-spacing:.08em;}
-
-.slide h2{font-size:40px;}
-.slide h3{font-size:31px;}
-.dek{margin-top:11px;font-size:19px;color:var(--muted);max-width:1080px;line-height:1.45;}
-.dek em{color:var(--ink-2);font-style:normal;font-weight:600;}
-
-/* =====================================================================
-   GRIDS
-   ===================================================================== */
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;}
-.g-2-1{display:grid;grid-template-columns:2fr 1fr;gap:16px;}
-.g-1-2{display:grid;grid-template-columns:1fr 2fr;gap:16px;}
-.g-3-2{display:grid;grid-template-columns:3fr 2fr;gap:16px;}
-.grow{flex:1 1 auto;min-height:0;}
-.stack{display:flex;flex-direction:column;gap:14px;min-height:0;}
-
-/* =====================================================================
-   CARD
-   ===================================================================== */
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
-  padding:17px 19px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:10px;min-height:0;}
-.card.flush{padding:0;overflow:hidden;}
-.card.tint{background:var(--pa-soft);border-color:color-mix(in srgb,var(--pa) 22%,var(--line));}
-.card.rail{border-left:4px solid var(--pa);}
-.card-t{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:750;
-  letter-spacing:.12em;text-transform:uppercase;color:var(--pa-deep);}
-.card-t .n{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;
-  border-radius:5px;background:var(--pa);color:#fff;font-size:11.5px;font-weight:800;letter-spacing:0;}
-.card-t.neutral{color:var(--muted);}
-
-/* bullet lists */
-.reveal ul.bul{display:flex;flex-direction:column;gap:9px;}
-.bul li{position:relative;padding-left:19px;font-size:17.5px;line-height:1.44;color:var(--body);}
-.bul li::before{content:"";position:absolute;left:2px;top:9px;width:6px;height:6px;border-radius:2px;
-  background:var(--pa);opacity:.85;}
-.bul.sm li{font-size:16px;padding-left:17px;}
-.bul.sm li::before{top:8px;width:5px;height:5px;}
-.bul li b{color:var(--ink);font-weight:650;}
-
-/* =====================================================================
-   METRICS
-   ===================================================================== */
-.metric{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
-  padding:15px 17px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:5px;
-  border-top:3px solid var(--pa);}
-.metric .v{font-size:36px;font-weight:800;color:var(--ink);letter-spacing:-.03em;
-  line-height:1.05;font-variant-numeric:tabular-nums;}
-.metric .v .u{font-size:.5em;font-weight:700;color:var(--muted);letter-spacing:0;margin-left:2px;}
-.metric .l{font-size:14.5px;font-weight:650;color:var(--ink-2);line-height:1.3;}
-.metric .d{font-size:13px;color:var(--muted);line-height:1.4;}
-.metric.lg .v{font-size:46px;}
-.metric.sm .v{font-size:29px;}
-
-/* hero metric strip (on section openers) */
-.mstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:var(--surface);
-  border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);}
-.mstrip > div{padding:16px 20px;border-left:1px solid var(--line);}
-.mstrip > div:first-child{border-left:0;}
-.mstrip .v{font-size:32px;font-weight:800;color:var(--pa-deep);letter-spacing:-.03em;
-  font-variant-numeric:tabular-nums;line-height:1.1;}
-.mstrip .l{font-size:13.5px;color:var(--muted);margin-top:3px;font-weight:600;line-height:1.35;}
-
-/* confidence chips */
-.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:750;
-  letter-spacing:.07em;text-transform:uppercase;padding:3px 8px;border-radius:99px;
-  border:1px solid transparent;white-space:nowrap;align-self:flex-start;}
-.chip::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;}
-.chip.measured    {color:var(--green);background:var(--green-soft);border-color:#a7f3d0;}
-.chip.reproducible{color:var(--accent-deep);background:var(--accent-soft);border-color:#bfdbfe;}
-.chip.estimated   {color:var(--amber);background:var(--amber-soft);border-color:#fde68a;}
-.chip.to-measure  {color:var(--muted);background:var(--surface-2);border-color:var(--line-2);}
-.chip.plain{color:var(--muted);background:var(--surface-2);border-color:var(--line-2);}
-.chip.plain::before{display:none;}
-
-/* tech pills */
-.pills{display:flex;flex-wrap:wrap;gap:7px;}
-.pills span{font-family:var(--mono);font-size:13px;color:var(--ink-2);background:var(--surface);
-  border:1px solid var(--line-2);border-radius:99px;padding:4px 11px;white-space:nowrap;}
-
-/* =====================================================================
-   DIAGRAM CONTAINER  (swap-in ready)
-   ===================================================================== */
-.diagram{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
-  box-shadow:var(--sh);display:flex;flex-direction:column;overflow:hidden;min-height:0;flex:1 1 auto;}
-.diagram-bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;
-  padding:9px 15px;background:var(--surface-2);border-bottom:1px solid var(--line);}
-.diagram-bar .t{font-size:12.5px;font-weight:750;letter-spacing:.11em;text-transform:uppercase;
-  color:var(--pa-deep);display:flex;align-items:center;gap:8px;}
-.diagram-bar .t::before{content:"";width:14px;height:3px;border-radius:2px;background:var(--pa);}
-.diagram-bar .id{font-family:var(--mono);font-size:11.5px;color:var(--faint);}
-.diagram-stage{flex:1 1 auto;min-height:150px;display:flex;align-items:center;justify-content:center;
-  padding:14px 16px;background:
-    radial-gradient(circle at 1px 1px, #e2e8f0 1px, transparent 0) 0 0/22px 22px, var(--surface);}
-.diagram-stage > *{max-width:100%;max-height:100%;}
-/* Mermaid emits a viewBox; forcing 100%/100% makes it scale to fit and self-centre. */
-.diagram-stage svg{width:100% !important;height:100% !important;max-width:none !important;}
-.diagram-stage img{max-width:100%;max-height:100%;object-fit:contain;}
-.diagram-cap{flex:0 0 auto;padding:9px 15px;border-top:1px solid var(--line);
-  background:var(--surface);font-size:13.5px;color:var(--muted);line-height:1.4;}
-.diagram-cap b{color:var(--ink-2);font-weight:650;}
-.mermaid{margin:0;background:none;border:0;padding:0;box-shadow:none;font-size:inherit;
-  display:flex;align-items:center;justify-content:center;width:100%;height:100%;}
-.mermaid[data-processed] > svg{display:block;}
-.diagram-fallback{font-family:var(--mono);font-size:13px;color:var(--muted);
-  white-space:pre;line-height:1.45;text-align:left;}
-
-/* =====================================================================
-   COMPONENT TABLE
-   ===================================================================== */
-.ctab{width:100%;border-collapse:collapse;font-size:15.5px;}
-.ctab thead th{text-align:left;font-size:11.5px;font-weight:750;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--muted);padding:9px 14px;background:var(--surface-2);
-  border-bottom:1px solid var(--line);}
-.ctab tbody td{padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.38;}
-.ctab tbody tr:last-child td{border-bottom:0;}
-.ctab tbody tr:nth-child(even){background:#fbfdff;}
-.ctab .nm{font-weight:680;color:var(--ink);white-space:nowrap;}
-.ctab.dense .nm .tech{display:inline;white-space:nowrap;margin-left:6px;opacity:.85;}
-.ctab .tech{font-family:var(--mono);font-size:13.5px;color:var(--pa-deep);white-space:nowrap;}
-.ctab .rsp{color:var(--body);}
-.ctab.dense{font-size:14px;}
-.ctab.dense thead th{padding:6px 12px;font-size:10.5px;}
-.ctab.dense tbody td{padding:5px 12px;line-height:1.3;}
-.ctab.dense .tech{font-size:12px;}
-
-/* =====================================================================
-   FLOW / LIFECYCLE
-   ===================================================================== */
-.reveal ol.flow{display:grid;grid-template-columns:1fr 1fr;gap:7px 16px;align-content:start;}
-.reveal ol.flow.one{grid-template-columns:1fr;}
-.reveal ol.flow.three{grid-template-columns:repeat(3,1fr);gap:7px 12px;}
-.flow.three .dt{font-size:13px;}
-.flow li{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start;
-  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);
-  padding:8px 11px;box-shadow:0 1px 2px rgba(15,23,42,.04);}
-.flow .n{display:flex;align-items:center;justify-content:center;width:24px;height:24px;
-  border-radius:7px;background:var(--pa);color:#fff;font-size:13px;font-weight:800;
-  font-variant-numeric:tabular-nums;margin-top:1px;}
-.flow .ttl{font-size:14.5px;font-weight:700;color:var(--ink);line-height:1.25;
-  display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
-.flow .an{font-family:var(--mono);font-size:11.5px;font-weight:600;color:var(--pa-deep);
-  background:var(--pa-soft);border-radius:5px;padding:1px 6px;white-space:nowrap;}
-.flow .dt{font-size:13.5px;color:var(--muted);line-height:1.38;margin-top:2px;}
-.flow .dt code{font-size:13px;}
-
-/* phase divider inside a flow */
-.flow li.flow-phase{grid-column:1/-1;display:flex;align-items:center;gap:10px;font-size:11.5px;
-  background:none;border:0;box-shadow:none;padding:0;
-  font-weight:750;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
-.flow-phase::after{content:"";flex:1;height:1px;background:var(--line);}
-
-/* =====================================================================
-   TRADE-OFFS
-   ===================================================================== */
-.to{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
-  padding:12px 15px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:8px;
-  border-left:4px solid var(--pa);}
-.to .axis{font-size:11.5px;font-weight:750;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
-.to .pick{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:16px;line-height:1.25;}
-.to .yes{font-weight:700;color:var(--ink);background:var(--pa-soft);border:1px solid color-mix(in srgb,var(--pa) 26%,transparent);
-  border-radius:7px;padding:3px 9px;}
-.to .vs{font-size:11.5px;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
-.to .no{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line-2);}
-.to .why{font-size:15.5px;color:var(--body);line-height:1.42;}
-.to .cost{font-size:14.5px;color:var(--amber);line-height:1.4;
-  background:var(--amber-soft);border-radius:var(--r-xs);padding:6px 9px;border:1px solid #fde68a;}
-.to .cost b{color:#92400e;font-weight:750;}
-
-/* risk lists */
-.risk li{position:relative;padding-left:22px;font-size:14.5px;line-height:1.4;margin-bottom:6px;color:var(--body);}
-.risk li:last-child{margin-bottom:0;}
-.risk li::before{position:absolute;left:0;top:0;font-size:13px;font-weight:800;}
-.risk.edge li::before{content:"◆";color:var(--cyan);}
-.risk.fail li::before{content:"▲";color:var(--rose);}
-.risk li b{color:var(--ink);font-weight:650;}
-
-/* =====================================================================
-   CALLOUT / QUOTE
-   ===================================================================== */
-.callout{background:var(--ink);color:#e2e8f0;border-radius:var(--r);padding:15px 19px;
-  font-size:17px;line-height:1.5;display:flex;gap:13px;align-items:flex-start;}
-.callout::before{content:"";flex:0 0 auto;width:3px;align-self:stretch;border-radius:2px;background:var(--pa);}
-.callout b,.callout strong{color:#fff;font-weight:700;}
-.callout code{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.16);color:#bae6fd;}
-.callout .lead{font-size:11.5px;font-weight:750;letter-spacing:.13em;text-transform:uppercase;
-  color:#7dd3fc;display:block;margin-bottom:6px;}
-
-.note{background:var(--surface-2);border:1px dashed var(--line-2);border-radius:var(--r-sm);
-  padding:11px 14px;font-size:14.5px;color:var(--muted);line-height:1.45;}
-.note b{color:var(--ink-2);font-weight:650;}
-
-/* =====================================================================
-   TITLE / SECTION OPENERS
-   ===================================================================== */
-.hero{display:flex;flex-direction:column;justify-content:center;height:830px;padding:0 60px;box-sizing:border-box;}
-.hero h1{font-size:74px;letter-spacing:-.035em;line-height:1.02;}
-.hero .sub{font-size:24px;color:var(--muted);margin-top:20px;max-width:900px;line-height:1.5;}
-.hero .rule{width:74px;height:5px;border-radius:3px;background:var(--pa);margin:26px 0;}
-.eyebrow{font-family:var(--mono);font-size:15px;font-weight:600;letter-spacing:.16em;
+/* content slide */
+.slide{position:relative;display:flex;flex-direction:column;height:830px;
+  padding:58px 72px 54px;box-sizing:border-box;}
+.head{flex:0 0 auto;margin-bottom:36px;}
+.kicker{display:inline-flex;align-items:center;gap:12px;margin-bottom:14px;
+  font-family:var(--mono);font-size:15px;font-weight:600;letter-spacing:.14em;
   text-transform:uppercase;color:var(--pa-deep);}
+.kicker::before{content:"";width:22px;height:3px;border-radius:2px;background:var(--pa);}
+.slide h2{font-size:54px;}
+.split{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:1.55fr 1fr;gap:48px;}
+.side{display:flex;flex-direction:column;min-height:0;}
 
-.sec-no{font-family:var(--mono);font-size:96px;font-weight:800;color:var(--pa);opacity:.16;
-  line-height:.85;letter-spacing:-.05em;}
+/* title / closing */
+.hero{position:relative;display:flex;flex-direction:column;justify-content:center;
+  height:830px;padding:0 84px;box-sizing:border-box;}
 
-.idcard{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:16px;color:var(--muted);align-items:center;}
-.idcard span{display:inline-flex;align-items:center;gap:7px;}
+/* project opener: text left, visual right */
+.opener{display:grid;grid-template-columns:1.25fr 1fr;gap:48px;align-items:center;
+  height:830px;padding:0 72px 0 84px;box-sizing:border-box;
+  background:radial-gradient(1100px 760px at 100% 0%, var(--pa-soft), transparent 64%);}
+.opener .visual{height:600px;}
+
+.eyebrow{font-family:var(--mono);font-size:16px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--pa-deep);}
+.hero h1,.opener h1{font-size:104px;margin-top:18px;}
+.lede{font-size:30px;line-height:1.35;color:var(--body);margin-top:24px;max-width:660px;}
+.lede.quiet{margin-top:4px;color:var(--muted);}
+.hero .lede{max-width:940px;}
+
+/* =====================================================================
+   STATS (proportional figures on purpose - no tabular-nums)
+   ===================================================================== */
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 34px;margin-top:46px;max-width:700px;}
+.stat{padding-top:16px;border-top:3px solid var(--pa);}
+.stat .v{font-size:50px;font-weight:750;color:var(--ink);letter-spacing:-.03em;line-height:1;white-space:nowrap;}
+.stat .l{font-size:18px;color:var(--muted);margin-top:10px;line-height:1.35;}
+.stat-stack{display:flex;flex-direction:column;justify-content:center;gap:34px;flex:1 1 auto;}
+.stat-stack .stat .v{font-size:58px;}
+.stat-stack .stat .l{font-size:20px;}
+
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:38px;max-width:780px;}
+.pills span{font-family:var(--mono);font-size:15px;color:var(--ink-2);background:var(--surface);
+  border:1px solid var(--line-2);border-radius:99px;padding:5px 13px;white-space:nowrap;}
+
+/* =====================================================================
+   NUMBERED POINTS + FOOT LINE
+   ===================================================================== */
+.reveal ol.points{display:flex;flex-direction:column;justify-content:center;gap:34px;flex:1 1 auto;}
+.points li{display:grid;grid-template-columns:48px 1fr;gap:6px 14px;}
+.points .n{grid-row:span 2;font-family:var(--mono);font-size:17px;font-weight:700;color:var(--pa);padding-top:8px;}
+.points .t{font-size:29px;font-weight:700;color:var(--ink);letter-spacing:-.012em;line-height:1.2;}
+.points .d{font-size:21px;color:var(--muted);line-height:1.4;}
+.foot{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding-top:22px;
+  border-top:1px solid var(--line);font-size:20px;color:var(--ink-2);}
+.foot::before{content:"";flex:0 0 auto;width:9px;height:9px;border-radius:50%;background:var(--pa);}
+
+/* =====================================================================
+   MEDIA SLOT
+   A figure with data-src="docs/name" shows docs/name.{gif,mp4,webm,png,jpg,jpeg,webp,svg}
+   if one exists. Otherwise it shows its fallback (diagram or illustration),
+   or an empty placeholder. Drop a file in docs/ - no HTML edit needed.
+   ===================================================================== */
+.media{position:relative;margin:0;display:flex;flex-direction:column;min-height:0;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--sh);overflow:hidden;}
+.media.chrome::before{content:"";flex:0 0 38px;border-bottom:1px solid var(--line);background:
+  radial-gradient(circle at 22px 19px,#f87171 5px,transparent 6px),
+  radial-gradient(circle at 40px 19px,#fbbf24 5px,transparent 6px),
+  radial-gradient(circle at 58px 19px,#34d399 5px,transparent 6px), var(--surface-2);}
+.media.plain{background:transparent;border:0;box-shadow:none;}
+.media-stage{position:relative;flex:1 1 auto;min-height:0;}
+.media.dots .media-stage{background:radial-gradient(circle at 1px 1px,#e2e8f0 1px,transparent 0) 0 0/24px 24px;}
+.media-stage > img,.media-stage > video{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:contain;background:var(--surface);}
+.media.plain .media-stage > img,.media.plain .media-stage > video{background:transparent;}
+.media-fallback,.media-empty{position:absolute;inset:24px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;}
+.media.has-media .media-fallback,.media.has-media .media-empty{display:none;}
+.media-empty{gap:12px;border:2px dashed var(--line-2);border-radius:var(--r-sm);color:var(--muted);text-align:center;}
+.media-empty .play{width:66px;height:66px;border-radius:50%;background:var(--pa-soft);display:grid;place-items:center;}
+.media-empty .play::before{content:"";margin-left:6px;border-left:20px solid var(--pa);
+  border-top:12px solid transparent;border-bottom:12px solid transparent;}
+.media-empty b{font-size:24px;color:var(--ink-2);}
+.media-empty span{font-size:18px;}
+.media-empty code{font-family:var(--mono);font-size:14px;color:var(--pa-deep);background:var(--pa-soft);
+  border-radius:6px;padding:3px 8px;}
+
+/* Mermaid fallback diagrams scale to fit their slot */
+.reveal pre.mermaid{margin:0;background:none;border:0;padding:0;box-shadow:none;font-size:inherit;
+  display:flex;align-items:center;justify-content:center;width:100%;height:100%;}
+.mermaid svg{width:100% !important;height:100% !important;max-width:none !important;}
+.diagram-fallback{font-family:var(--mono);font-size:15px;color:var(--muted);white-space:pre;line-height:1.45;text-align:left;}
+
+/* =====================================================================
+   ILLUSTRATIONS (opener fallbacks)
+   ===================================================================== */
+.fig-cap{font-size:22px;font-weight:600;color:var(--ink-2);text-align:center;margin-top:26px;}
+
+/* OptiServe: schematic cost curve */
+.ucurve{width:100%;max-width:560px;height:auto;overflow:visible;}
+.ucurve .ax{stroke:var(--line-2);stroke-width:1;}
+.ucurve .c{fill:none;stroke:var(--pa);stroke-width:3;stroke-linecap:round;}
+.ucurve .dot{fill:var(--pa);stroke:var(--bg);stroke-width:3;}
+.ucurve .lb{font:500 17px var(--sans);fill:var(--muted);}
+.ucurve .hi{font:700 19px var(--sans);fill:var(--ink-2);}
+
+/* Guardian: mixture-of-experts grid, 3 of 30 tiles active */
+.moe{display:grid;grid-template-columns:repeat(10,1fr);gap:9px;width:100%;max-width:480px;}
+.moe i{aspect-ratio:1;border-radius:7px;background:var(--line);transition:background-color .6s ease;}
+.moe i.on{background:var(--pa);}
+
+/* BakeryPilot: action card */
+.acard{width:420px;background:var(--surface);border:1px solid var(--line);border-radius:18px;
+  box-shadow:var(--sh);padding:24px 26px;display:flex;flex-direction:column;gap:12px;}
+.acard .st{align-self:flex-start;font-size:14px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--amber);background:var(--amber-soft);border-radius:99px;padding:4px 12px;}
+.acard .tt{font-size:28px;font-weight:700;color:var(--ink);letter-spacing:-.015em;}
+.acard .mt{font-size:19px;color:var(--muted);}
+.acard .btns{display:flex;gap:10px;margin-top:8px;}
+.acard .btns span{flex:1;text-align:center;font-size:19px;font-weight:650;border-radius:11px;
+  padding:11px 0;border:1px solid var(--line-2);color:var(--ink-2);}
+.acard .btns .ok{background:var(--pa);border-color:var(--pa);color:#fff;}
+
+/* SevenTask: a board whose columns are rows, not code */
+.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:100%;max-width:480px;}
+.board .col{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;
+  padding:11px 9px;display:flex;flex-direction:column;gap:8px;min-height:158px;}
+.board .ct{font-size:12px;font-weight:750;letter-spacing:.07em;text-transform:uppercase;color:var(--pa-deep);}
+.board i{display:block;height:26px;border-radius:7px;background:var(--surface);
+  border:1px solid var(--line);box-shadow:0 1px 2px rgba(15,23,42,.05);}
+.board i.on{background:var(--pa-soft);border-color:color-mix(in srgb,var(--pa) 32%,var(--line));}
+
+/* Realest: a shortlist card verified by a phone call */
+.acard .st.ok{color:var(--teal);background:var(--teal-soft);}
+.acard .src{font-family:var(--mono);font-size:14px;color:var(--faint);}
+
+/* Guardian: bytes-read-per-token bars (one series, emphasis on NVFP4) */
+.bars{display:flex;flex-direction:column;gap:14px;}
+.bars .ttl{font-size:22px;font-weight:700;color:var(--ink);}
+.bars .sub{font-size:17px;color:var(--muted);margin-top:-8px;}
+.bar{display:grid;grid-template-columns:76px 1fr;align-items:center;gap:12px;}
+.bar .k{font-family:var(--mono);font-size:16px;color:var(--ink-2);}
+.bar .track{display:flex;align-items:center;gap:10px;}
+.bar .fill{height:22px;width:calc(var(--p) * .74);border-radius:0 4px 4px 0;background:var(--line-2);}
+.bar.hi .fill{background:var(--pa);}
+.bar .val{font-size:18px;color:var(--ink-2);white-space:nowrap;}
+
+/* =====================================================================
+   TITLE, HABITS, QUESTIONS
+   ===================================================================== */
+.reveal ol.agenda{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;margin-top:60px;max-width:1260px;}
+.agenda li{border-top:3px solid var(--ac);padding-top:14px;}
+.agenda .no{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--ac);}
+.agenda .nm{font-size:25px;font-weight:700;color:var(--ink);margin-top:6px;}
+.agenda .ds{font-size:18px;color:var(--muted);margin-top:4px;line-height:1.35;}
+
+.idcard{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:52px;font-size:18px;color:var(--muted);align-items:center;}
 .idcard b{color:var(--ink-2);font-weight:650;}
 .idcard .dot{width:4px;height:4px;border-radius:50%;background:var(--line-2);}
 
-/* nav legend on title slide */
-.navlegend{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:760px;}
-.navlegend div{display:flex;align-items:center;gap:11px;font-size:15.5px;color:var(--muted);
-  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 13px;}
-.navlegend kbd{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--ink);
-  background:var(--surface-2);border:1px solid var(--line-2);border-bottom-width:2px;
-  border-radius:5px;padding:3px 7px;white-space:nowrap;}
-.navlegend b{color:var(--ink-2);font-weight:650;}
-
-/* agenda */
-.reveal ol.agenda{display:flex;flex-direction:column;gap:11px;justify-content:space-between;}
-.agenda li{display:grid;grid-template-columns:52px 1fr auto;gap:16px;align-items:center;
-  background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--ac,var(--accent));
-  border-radius:var(--r);padding:14px 18px;box-shadow:var(--sh);}
-.agenda .no{font-family:var(--mono);font-size:22px;font-weight:800;color:var(--ac,var(--accent));opacity:.55;}
-.agenda .ttl{font-size:21px;font-weight:700;color:var(--ink);}
-.agenda .ttl small{display:block;font-size:15px;font-weight:400;color:var(--muted);margin-top:3px;letter-spacing:0;}
-.agenda .tag{font-family:var(--mono);font-size:12.5px;color:var(--muted);background:var(--surface-2);
-  border:1px solid var(--line);border-radius:99px;padding:4px 11px;white-space:nowrap;}
-
-/* footer breadcrumb */
-.crumb{position:absolute;left:46px;bottom:16px;font-family:var(--mono);font-size:12px;
-  color:var(--faint);letter-spacing:.05em;}
-
-/* utility */
-.mono{font-family:var(--mono);}
-.muted{color:var(--muted);}
-.tiny{font-size:13px;}
-.right{margin-left:auto;}
-.nowrap{white-space:nowrap;}
+.habits{flex:1 1 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;align-content:center;}
+.habit{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);
+  padding:34px 32px;display:flex;flex-direction:column;gap:16px;min-height:380px;box-sizing:border-box;}
+.habit .n{font-family:var(--mono);font-size:46px;font-weight:700;color:var(--pa);opacity:.32;line-height:1;}
+.habit .t{font-size:33px;font-weight:750;color:var(--ink);line-height:1.12;letter-spacing:-.02em;}
+.habit .d{font-size:21px;color:var(--muted);line-height:1.4;}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;}
+.tags span{font-family:var(--mono);font-size:14px;color:var(--ink-2);background:var(--surface-2);
+  border:1px solid var(--line);border-radius:99px;padding:4px 11px;}
 
 /* =====================================================================
    PRINT / PDF  (append ?print-pdf to the URL, then print to PDF)
    ===================================================================== */
 @media print{
   .reveal .slide-number,.reveal .controls,.reveal .progress{display:none !important;}
-  .card,.metric,.diagram,.to,.flow li{box-shadow:none !important;}
+  .media,.habit,.acard{box-shadow:none !important;}
 }
+/* =====================================================================
+   RESPONSIVE CANVAS
+   A script in <head> tags <html> with one mode before first paint:
+     deck-landscape  1440 × 830   laptops and desktops
+     deck-compact    1120 × 540   phones held sideways
+     deck-portrait    540 × 960   phones and tablets held upright
+   Reveal scales the chosen canvas to the screen. These rules only
+   rearrange and resize content for the two smaller canvases.
+   ===================================================================== */
+.hero h1.close-title{font-size:84px;}
+
+/* ---------- compact: phones held sideways ---------- */
+.deck-compact .slide{height:540px;padding:26px 44px 24px;}
+.deck-compact .hero{height:540px;padding:0 56px;}
+.deck-compact .opener{height:540px;padding:0 44px 0 56px;gap:32px;}
+.deck-compact .opener .visual{height:440px;}
+.deck-compact .head{margin-bottom:16px;}
+.deck-compact .kicker{font-size:13px;margin-bottom:8px;}
+.deck-compact .slide h2{font-size:40px;}
+.deck-compact .split{gap:30px;}
+.deck-compact .eyebrow{font-size:13px;}
+.deck-compact .hero h1,.deck-compact .opener h1{font-size:76px;margin-top:10px;}
+.deck-compact .hero h1.close-title{font-size:58px;}
+.deck-compact .lede{font-size:24px;margin-top:14px;}
+.deck-compact .stats{margin-top:24px;gap:0 22px;}
+.deck-compact .stat{padding-top:12px;}
+.deck-compact .stat .v{font-size:38px;}
+.deck-compact .stat .l{font-size:15px;margin-top:8px;}
+.deck-compact .stat-stack{gap:18px;}
+.deck-compact .stat-stack .stat .v{font-size:42px;}
+.deck-compact .stat-stack .stat .l{font-size:17px;}
+.deck-compact .pills{margin-top:20px;}
+.deck-compact .pills span{font-size:13px;padding:4px 10px;}
+.deck-compact .reveal ol.points{gap:18px;}
+.deck-compact .points li{grid-template-columns:40px 1fr;}
+.deck-compact .points .n{font-size:15px;padding-top:5px;}
+.deck-compact .points .t{font-size:24px;}
+.deck-compact .points .d{font-size:18px;}
+.deck-compact .foot{font-size:17px;padding-top:14px;}
+.deck-compact .media-fallback,.deck-compact .media-empty{inset:16px;}
+.deck-compact .media-empty .play{width:52px;height:52px;}
+.deck-compact .media-empty b{font-size:20px;}
+.deck-compact .media-empty span{font-size:16px;}
+.deck-compact .fig-cap{font-size:19px;margin-top:16px;}
+.deck-compact .ucurve{max-width:420px;}
+.deck-compact .moe{max-width:400px;gap:7px;}
+.deck-compact .board{max-width:410px;}
+.deck-compact .board .col{min-height:132px;}
+.deck-compact .acard{width:360px;padding:18px 20px;}
+.deck-compact .acard .tt{font-size:24px;}
+.deck-compact .acard .mt{font-size:16px;}
+.deck-compact .acard .btns span{font-size:16px;padding:8px 0;}
+.deck-compact .bars{gap:10px;}
+.deck-compact .bars .ttl{font-size:19px;}
+.deck-compact .bars .sub{font-size:15px;}
+.deck-compact .bar .k{font-size:14px;}
+.deck-compact .bar .fill{height:18px;}
+.deck-compact .bar .val{font-size:16px;}
+.deck-compact .reveal ol.agenda{margin-top:34px;gap:16px;}
+.deck-compact .agenda .nm{font-size:21px;}
+.deck-compact .agenda .ds{font-size:15px;}
+.deck-compact .idcard{margin-top:28px;font-size:15px;}
+.deck-compact .habits{gap:18px;}
+.deck-compact .habit{padding:22px;min-height:0;gap:10px;}
+.deck-compact .habit .n{font-size:32px;}
+.deck-compact .habit .t{font-size:26px;}
+.deck-compact .habit .d{font-size:18px;}
+
+/* ---------- portrait: phones and tablets held upright ---------- */
+.deck-portrait .slide{height:960px;padding:40px 28px 36px;justify-content:center;}
+.deck-portrait .hero{height:960px;padding:0 28px;}
+.deck-portrait .opener{display:flex;flex-direction:column;justify-content:center;align-items:stretch;
+  gap:26px;height:960px;padding:0 28px;
+  background:radial-gradient(700px 520px at 100% 0%, var(--pa-soft), transparent 64%);}
+.deck-portrait .opener .visual{flex:0 0 auto;height:320px;}
+.deck-portrait .head{margin-bottom:20px;}
+.deck-portrait .kicker{font-size:13px;margin-bottom:8px;gap:10px;}
+.deck-portrait .slide h2{font-size:38px;}
+.deck-portrait .split{flex:0 0 auto;grid-template-columns:1fr;grid-template-rows:auto auto;align-content:start;gap:22px;}
+.deck-portrait .split > .media{height:360px;}
+.deck-portrait .split > .media.chrome{height:400px;}
+.deck-portrait .eyebrow{font-size:13px;letter-spacing:.12em;line-height:1.5;}
+.deck-portrait .hero h1,.deck-portrait .opener h1{font-size:62px;margin-top:10px;}
+.deck-portrait .hero h1.close-title{font-size:50px;}
+.deck-portrait .lede{font-size:23px;margin-top:12px;}
+.deck-portrait .stats{margin-top:22px;gap:0 16px;max-width:none;}
+.deck-portrait .stat{padding-top:10px;}
+.deck-portrait .stat .v{font-size:32px;}
+.deck-portrait .stat .l{font-size:16px;margin-top:6px;}
+.deck-portrait .stat-stack{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:0 16px;flex:0 0 auto;}
+.deck-portrait .stat-stack .stat .v{font-size:32px;}
+.deck-portrait .stat-stack .stat .l{font-size:16px;}
+.deck-portrait .pills{margin-top:18px;gap:6px;}
+.deck-portrait .pills span{font-size:13px;padding:4px 9px;}
+.deck-portrait .reveal ol.points{justify-content:flex-start;gap:16px;flex:0 0 auto;}
+.deck-portrait .points li{grid-template-columns:34px 1fr;gap:4px 10px;}
+.deck-portrait .points .n{font-size:13px;padding-top:5px;}
+.deck-portrait .points .t{font-size:23px;}
+.deck-portrait .points .d{font-size:18px;}
+.deck-portrait .foot{margin-top:18px;padding-top:14px;font-size:16px;}
+.deck-portrait .media-fallback,.deck-portrait .media-empty{inset:14px;}
+.deck-portrait .media-empty{gap:8px;}
+.deck-portrait .media-empty .play{width:46px;height:46px;}
+.deck-portrait .media-empty .play::before{margin-left:4px;border-left-width:15px;border-top-width:9px;border-bottom-width:9px;}
+.deck-portrait .media-empty b{font-size:19px;}
+.deck-portrait .media-empty span{font-size:16px;padding:0 10px;}
+.deck-portrait .media-empty code{font-size:12px;}
+.deck-portrait .fig-cap{font-size:18px;margin-top:12px;}
+.deck-portrait .ucurve{max-width:330px;}
+.deck-portrait .moe{max-width:340px;gap:6px;}
+.deck-portrait .moe i{border-radius:5px;}
+.deck-portrait .board{max-width:340px;gap:8px;}
+.deck-portrait .board .col{min-height:116px;padding:9px 7px;}
+.deck-portrait .board i{height:22px;}
+.deck-portrait .acard .src{font-size:13px;}
+.deck-portrait .acard{width:340px;padding:16px 18px;gap:9px;}
+.deck-portrait .acard .st{font-size:12px;}
+.deck-portrait .acard .tt{font-size:22px;}
+.deck-portrait .acard .mt{font-size:16px;}
+.deck-portrait .acard .btns span{font-size:15px;padding:8px 0;}
+.deck-portrait .bars{gap:8px;margin-bottom:20px;}
+.deck-portrait .bars .ttl{font-size:18px;}
+.deck-portrait .bars .sub{font-size:15px;margin-top:-4px;}
+.deck-portrait .bar{grid-template-columns:62px 1fr;}
+.deck-portrait .bar .k{font-size:14px;}
+.deck-portrait .bar .fill{height:16px;}
+.deck-portrait .bar .val{font-size:15px;}
+.deck-portrait .reveal ol.agenda{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 16px;margin-top:34px;}
+.deck-portrait .agenda .nm{font-size:20px;}
+.deck-portrait .agenda .ds{font-size:16px;}
+.deck-portrait .idcard{margin-top:30px;font-size:15px;gap:6px 14px;}
+.deck-portrait .habits{flex:0 0 auto;grid-template-columns:1fr;gap:14px;align-content:start;}
+.deck-portrait .habit{padding:18px 20px;min-height:0;gap:8px;}
+.deck-portrait .habit .n{font-size:22px;}
+.deck-portrait .habit .t{font-size:23px;}
+.deck-portrait .habit .d{font-size:18px;}
+.deck-portrait .tags span{font-size:13px;}
 </style>
 </head>
 <body>
 <div class="reveal">
 <div class="slides">
+
 <!-- =====================================================================
-     SECTION 1 — INTRO
+     1 — TITLE
      ===================================================================== -->
 <section class="proj-d">
-
-	<!-- 1.0 Title -->
-	<section>
-		<div class="hero">
-			<div class="eyebrow">Software Engineer &middot; Data Products</div>
-			<h1 style="margin-top:18px;">Three systems,<br>one way of&nbsp;working.</h1>
-			<div class="rule"></div>
-			<p class="sub">
-				One project tunes serverless ML pipelines for speed and cost. One runs a 30B model
-				on a single desktop-sized box. One puts a human approval step in front of an AI agent.
-				All three deal with the problem EvenUp works on every day:
-				<em>pushing documents through expensive, imperfect models &mdash; and being able to show your work.</em>
-			</p>
-
-			<div class="mstrip" style="margin-top:34px;max-width:1000px;">
-				<div><div class="v">98.6<span style="font-size:.6em">%</span></div><div class="l">as good as checking all 40,960 setups one by one &mdash; without checking them</div></div>
-				<div><div class="v">30B &rarr; 3B</div><div class="l">a 30B model on one desktop box, because only ~3B of it runs per word</div></div>
-				<div><div class="v">0</div><div class="l">times the AI can change real data on its own &mdash; a human signs off first</div></div>
-			</div>
-
-			<div class="idcard" style="margin-top:30px;">
-				<span><b>Arian Boukani</b></span><span class="dot"></span>
-				<span>MSc, Systems &amp; Performance Engineering</span><span class="dot"></span>
-				<span class="mono">2arian3.github.io</span><span class="dot"></span>
-				<span class="mono">github.com/2arian3</span>
-			</div>
-		</div>
-		<aside class="notes">
-			Open with the approach, not the projects. "Everything I'm going to show you is
-			about the same thing: a pipeline where the expensive step is a model, the output has to
-			be defensible, and somebody is paying per call." Then: 15 minutes, three systems,
-			deepest on the first. Tell them they can stop me anywhere.
-		</aside>
-	</section>
-
-	<!-- 1.1 Agenda -->
-	<section>
-		<div class="slide">
-			<header class="slide-head">
-				<div class="kicker">Agenda <span class="sep">/</span> press <span class="mono">&darr;</span> to drill into any section</div>
-				<h2>What I&rsquo;m going to show you</h2>
-				<p class="dek">Press <span class="mono">&darr;</span> on any project to go six slides deep: <em>the problem, what I built, how it works, how data moves through it, what it measured, and what I gave up.</em></p>
-			</header>
-			<div class="slide-body">
-				<ol class="agenda grow">
-					<li style="--ac:var(--accent);">
-						<span class="no">01</span>
-						<span class="ttl">OptiServe <small>MSc thesis. How much memory, and which model, should each step of a cloud ML pipeline use?</small></span>
-						<span class="tag">Python &middot; AWS &middot; optimization</span>
-					</li>
-					<li style="--ac:var(--cyan);">
-						<span class="no">02</span>
-						<span class="ttl">Guardian on DGX Spark <small>Moving a six-agent app off a cloud AI API and onto our own hardware, without rewriting the app</small></span>
-						<span class="tag">TensorRT-LLM &middot; NVFP4 &middot; FastAPI</span>
-					</li>
-					<li style="--ac:var(--teal);">
-						<span class="no">03</span>
-						<span class="ttl">BakeryPilot <small>An AI agent connected to a real database that simply cannot change anything without a person approving it</small></span>
-						<span class="tag">FastAPI &middot; LangGraph &middot; Postgres</span>
-					</li>
-					<li style="--ac:var(--violet);">
-						<span class="no">04</span>
-						<span class="ttl">Applied to EvenUp <small>How I&rsquo;d build the pipeline that turns medical records into structured data, and why I&rsquo;d process one page at a time</small></span>
-						<span class="tag">system design</span>
-					</li>
-				</ol>
-				<div class="callout">
-					<div>
-						<span class="lead">The through-line</span>
-						In all three, the slow and unpredictable AI model sits behind <b>one small, well-defined interface</b>.
-						That single choice is what makes the other two things possible:
-						<b>measuring what the model really costs</b>, and <b>proving where its answers came from</b>.
-					</div>
-				</div>
-			</div>
-			<div class="crumb">Intro &mdash; 2 / 2</div>
-		</div>
-		<aside class="notes">
-			Don't read the list. Say: "Three systems, and then ten minutes on how I'd apply this to
-			your extraction pipeline — that last section is the one I'd most like your pushback on."
-			If they're short on time, ask which project they want; the deck navigates sideways.
-		</aside>
-	</section>
-
-</section>
-<!-- =====================================================================
-     SECTION 2 — OPTISERVE
-     ===================================================================== -->
-<section class="proj-a">
-
-	<!-- 2.0 opener -->
-	<section>
-		<div class="hero">
-			<div class="sec-no">01</div>
-			<div class="eyebrow" style="margin-top:16px;">MSc thesis &middot; research artifact</div>
-			<h1 style="margin-top:12px;font-size:66px;">OptiServe</h1>
-			<div class="rule"></div>
-			<p class="sub">You have an ML pipeline running on AWS Lambda. For each step you pick
-				<em>how much memory</em> to give it and <em>which model</em> to run. Those choices decide your speed,
-				your bill, and your accuracy. <em>OptiServe picks them for you.</em></p>
-			<div class="mstrip" style="margin-top:30px;max-width:1030px;">
-				<div><div class="v">40,960</div><div class="l">configurations in the App3 benchmark space &mdash; three functions</div></div>
-				<div><div class="v">27.5&times; / 8.5&times;</div><div class="l">latency and cost spread across identical functional behaviour</div></div>
-				<div><div class="v">137 / 155</div><div class="l">tests that need no network, no credentials, no AWS</div></div>
-			</div>
-			<div class="pills" style="margin-top:26px;max-width:1030px;">
-				<span>Python 3.11/3.12</span><span>boto3 &middot; botocore</span><span>SciPy curve_fit</span><span>NumPy</span>
-				<span>networkx</span><span>AWS Lambda</span><span>CloudWatch Logs Insights</span><span>Step Functions</span>
-				<span>moto</span><span>pytest</span><span>ruff &middot; mypy</span><span>CloudWatch EMF</span>
-			</div>
-		</div>
-		<aside class="notes">
-			Lead with the question, not the tech. If they only remember one sentence: "two engines that
-			meet at exactly one point." Everything else on the next six slides hangs off that seam.
-		</aside>
-	</section>
-
-	<!-- 2.1 Problem -->
-	<section>
-		<div class="slide">
-			<header class="slide-head">
-				<div class="kicker">OptiServe <span class="sep">/</span> 01 Overview &amp; problem</div>
-				<h2>Serverless took away the servers. It didn&rsquo;t take away the tuning.</h2>
-			</header>
-			<div class="slide-body">
-				<div class="g3">
-					<div class="card rail">
-						<div class="card-t">Business problem</div>
-						<ul class="bul sm">
-							<li>Lambda exposes <b>exactly one performance knob</b> &mdash; memory size &mdash; which proportionally allocates vCPU.</li>
-							<li>You pay for memory &times; time. More memory costs more per second, but the job also finishes faster. So <b>the cost curve is U-shaped</b> &mdash; there is a real sweet spot, and it&rsquo;s different for every function.</li>
-							<li>ML workloads add a second knob: <b>which model variant to serve</b>. That moves latency, cost <i>and</i> output quality at once.</li>
-						</ul>
-					</div>
-					<div class="card rail">
-						<div class="card-t">Why static config fails</div>
-						<ul class="bul sm">
-							<li><b>The best setting depends on the data, not the code.</b> A batch of 12-page records and a batch of 400-page records want different memory &mdash; from the <i>same function</i>.</li>
-							<li><b>Best parts don&rsquo;t make a best whole.</b> Tuning each function on its own doesn&rsquo;t give you the best pipeline. An extra MB is worth more on the slowest path than off it.</li>
-							<li><b>Retries break your intuition.</b> A step that loops back runs about 1.43&times; per request. &ldquo;Tune the slowest function&rdquo; is wrong when a fast one runs three times.</li>
-						</ul>
-					</div>
-					<div class="card rail">
-						<div class="card-t">The engineering challenge</div>
-						<ul class="bul sm">
-							<li>The space is <b>combinatorial</b>: 40,960 configurations for <i>three</i> functions. A ten-stage pipeline with four variants each is ~10<sup>17</sup>.</li>
-							<li>Every measurement <b>costs real money and real wall-clock</b> &mdash; you cannot brute-force in production.</li>
-							<li>Measurements are <b>noisy</b>: cold starts, busy servers, run-to-run variation. The optimizer has to cope with unreliable readings.</li>
-						</ul>
-					</div>
-				</div>
-
-				<div class="g-2-1 grow">
-					<div class="card">
-						<div class="card-t neutral">The business case, in one table &mdash; the App3 benchmark</div>
-						<table class="ctab">
-							<thead><tr><th>Dimension</th><th>Range</th><th>Spread</th></tr></thead>
-							<tbody>
-								<tr><td class="nm">End-to-end latency</td><td class="tech">2,955 &ndash; 81,280 ms</td><td class="rsp"><b>27.5&times;</b></td></tr>
-								<tr><td class="nm">Cost per million invocations</td><td class="tech">321.78 &ndash; 2,728.36</td><td class="rsp"><b>8.5&times;</b></td></tr>
-								<tr><td class="nm">Configuration space</td><td class="tech">3 nodes &times; (1,4,4) variants &times; (16,16,10) steps</td><td class="rsp"><b>40,960</b></td></tr>
-							</tbody>
-						</table>
-						<p class="tiny muted" style="margin-top:2px;"><code>f1 &rarr; resnet &rarr; yolo</code>, with a 0.3 back-edge and a 0.2 self-loop. A 27&times; latency and 8.5&times; cost spread across <b>identical functional behaviour</b> is the entire business case &mdash; and nobody tunes 40,960 configurations by hand.</p>
-					</div>
-					<div class="card tint">
-						<div class="card-t">Why this is an EvenUp problem</div>
-						<p style="font-size:16.5px;line-height:1.45;">This is the same choice you make in a document pipeline: <b>use the cheap model by default, and only call the expensive one when the cheap one isn&rsquo;t sure</b> &mdash;
-							while staying inside limits on turnaround time, cost per case, and accuracy.</p>
-						<p style="font-size:16.5px;line-height:1.45;margin-top:6px;">Different dial. <b>Same problem.</b></p>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">OptiServe &mdash; 1 / 6</div>
-		</div>
-		<aside class="notes">
-			The U-shaped cost curve is the thing most people get wrong — say it explicitly: more memory
-			can be CHEAPER, because duration falls faster than the per-ms price rises.
-			Constraint interaction is the fourth point if they push: "under 5s p95" AND "under $X per
-			thousand docs" AND "at least 0.9 accuracy" is not three independent problems.
-		</aside>
-	</section>
-
-	<!-- 2.2 Ownership -->
-	<section>
-		<div class="slide">
-			<header class="slide-head">
-				<div class="kicker">OptiServe <span class="sep">/</span> 02 My role &amp; ownership</div>
-				<h2>What I built, and what was already there</h2>
-				<p class="dek">I worked on this alone. <em>The honest split:</em> the search strategies come from published research. The engineering around them is mine.</p>
-			</header>
-			<div class="slide-body">
-				<div class="g-2-1 grow">
-					<div class="card">
-						<div class="card-t">Components I own end to end</div>
-						<div class="g2" style="gap:11px;">
-							<div>
-								<ul class="bul sm">
-									<li><b>The AWS wrapper.</b> I tightened it until every AWS call in the project was <b>9 operations across 4 services</b>, all in one folder. Nothing outside <code>optiserve/aws/</code> talks to AWS at all.</li>
-									<li><b>Always put things back.</b> Before changing anything, I save the function&rsquo;s original settings. They get restored no matter how the run ends &mdash; success, crash, <code>Ctrl-C</code>, or being killed.</li>
-									<li><b>Runs you can resume.</b> Progress is saved under a fingerprint of the run&rsquo;s settings. Change a setting and you get a fresh run, instead of quietly mixing results that don&rsquo;t belong together.</li>
-								</ul>
-							</div>
-							<div>
-								<ul class="bul sm">
-									<li><b>Acquisition-function vectorization.</b> Rewrote <code>update_knowledge</code> from a Python loop to a NumPy kernel: <b>0.71 s &rarr; 0.0005 s</b>, bit-identical output.</li>
-									<li><b>A cache.</b> Keyed on the <b>exact numbers</b>, never rounded ones. Plus a second cache for the 54&nbsp;% of the work that only depends on the pipeline&rsquo;s shape.</li>
-									<li><b>Tests and CI.</b> Took the AWS folder from <b>0&nbsp;% to 76&ndash;100&nbsp;%</b> test coverage. The integration tests run twice, against two different fake-AWS setups.</li>
-									<li><b>Compat-flag discipline.</b> Two optimizer bugs I could not simply fix became named flags with a baseline on <i>both</i> sides.</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-
-					<div class="stack">
-						<div class="card">
-							<div class="card-t">Judgement &amp; communication</div>
-							<ul class="bul sm">
-								<li>One noise-reduction trick makes results look cleaner but shifts the average by <b>+1.3&nbsp;%</b>. I labelled it a <code>METHODOLOGY WARNING</code> in the code instead of hiding it.</li>
-								<li>Every result records <b>which settings produced it</b>, so numbers from different versions stay comparable.</li>
-							</ul>
-						</div>
-						<div class="card" style="border-left:4px solid var(--amber);">
-							<div class="card-t" style="color:var(--amber);">Not mine &mdash; say this before they ask</div>
-							<ul class="bul sm" style="--pa:var(--amber);">
-								<li>The three search strategies <b>come from published research, not from me.</b> One mode reproduces the paper exactly, bugs included. What&rsquo;s mine is the corrected version, the harness that measures how good the search actually is, and the switches that keep both honest.</li>
-								<li>The AWS wrapper classes <b>already existed</b>. I reviewed, hardened and tested them &mdash; which is how I found one method that <b>nothing in the project ever called</b>.</li>
-								<li>SciPy, networkx and moto do the numerical, graph and mocking work.</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">OptiServe &mdash; 2 / 6</div>
-		</div>
-		<aside class="notes">
-			Volunteer the amber card unprompted. A hiring manager who discovers the prior-research
-			boundary by asking has learned something different from one you told. The `reset_config`
-			zero-callers find is a good micro-story: it shows you read code rather than trusting it.
-		</aside>
-	</section>
-
-	<!-- 2.3 Architecture -->
-	<section>
-		<div class="slide">
-			<header class="slide-head tight">
-				<div class="kicker">OptiServe <span class="sep">/</span> 03 System architecture</div>
-				<h2>Two engines that meet at exactly one point</h2>
-			</header>
-			<div class="slide-body">
-				<!-- DIAGRAM: to swap in a final asset, replace this <pre class="mermaid"> with <img src="docs/optiserve-arch.svg" alt="..."> -->
-				<figure class="diagram" style="flex:0 0 440px;">
-						<div class="diagram-bar"><span class="t">System architecture</span><span class="id">fig-01 &middot; optiserve-arch</span></div>
-						<div class="diagram-stage">
-<pre class="mermaid">
-flowchart TB
-  CLI["optiserve CLI"]
-
-  subgraph A["ENGINE A - online profiling - costs money"]
-    direction LR
-    CM["ConfigManager - set, verify, restore in a finally"]
-    EXP["Explorer - cold start, then N concurrent invokes"]
-    LP["LogParser - billed duration, OOM, timeout"]
-    SMP["Sampler - adaptive, atomic checkpoints"]
-    FIT["Objective + curve_fit - active learning"]
-    CM --> EXP --> LP --> SMP --> FIT
-    FIT -.->|"next memory to sample"| CM
-  end
-
-  BR["WorkflowGraph.add_ml_function - THE SEAM - samples each fitted curve onto the memory grid"]
-
-  subgraph B["ENGINE B - offline - deterministic"]
-    direction LR
-    WG["WorkflowGraph - probabilistic control flow"]
-    APM["PerformanceModeling - de-loop, reduce to a DAG"]
-    OPT["ApplicationOptimizer - greedy PRCP"]
-    EV["Evaluation - brute-forced ground truth"]
-    WG --> APM --> OPT --> EV
-    OPT -.-> APM
-  end
-
-  CLI --> A
-  A --> BR
-  BR --> B
-</pre>
-						</div>
-					<figcaption class="diagram-cap"><b>The join between the two halves is a single method.</b> <code>add_ml_function</code> turns measured curves into a plain lookup table. After that, it&rsquo;s all just arithmetic.</figcaption>
-				</figure>
-
-				<div class="g-3-2 grow">
-					<div class="card flush">
-							<table class="ctab dense">
-								<thead><tr><th>Package</th><th>Responsibility</th></tr></thead>
-								<tbody>
-									<tr><td class="nm">optiserve/aws <span class="tech" style="font-weight:400;">boto3 + moto</span></td><td class="rsp">The only place AWS is called &mdash; 9 operations, 4 services.</td></tr>
-									<tr><td class="nm">profiling <span class="tech" style="font-weight:400;">ThreadPoolExecutor</span></td><td class="rsp">Sweeps memory, forces cold starts, prunes infeasible configs.</td></tr>
-									<tr><td class="nm">modeling <span class="tech" style="font-weight:400;">SciPy + NumPy</span></td><td class="rsp">Fits latency-vs-memory; picks the next memory to sample.</td></tr>
-									<tr><td class="nm">workflow <span class="tech" style="font-weight:400;">networkx</span></td><td class="rsp">Probabilistic control-flow graph; materializes <code>perf_profile</code> &mdash; the seam.</td></tr>
-									<tr><td class="nm">optimization <span class="tech" style="font-weight:400;">PRCP + compat flags</span></td><td class="rsp">Ranks critical paths; commits the best single-node move.</td></tr>
-									<tr><td class="nm">evaluation <span class="tech" style="font-weight:400;">brute-force CSV</span></td><td class="rsp">Brute-forces ground truth; measures the greedy gap.</td></tr>
-								</tbody>
-							</table>
-						</div>
-					<div class="callout">
-						<div><span class="lead">Why splitting it in two is the whole idea</span>
-							Half A talks to real AWS, so it&rsquo;s slow, noisy and costs money. Half B touches nothing, so it&rsquo;s <b>free and gives the same answer every time</b>.
-							That&rsquo;s why <b>137 of 155 tests run with no internet</b>, and why the whole thing can run against a fake AWS by setting one variable.
-							<b>None of the code knows whether AWS is real.</b></div>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">OptiServe &mdash; 3 / 6</div>
-		</div>
-		<aside class="notes">
-			Point at the BR box first, then work outwards in both directions. If they ask "why not one
-			engine": because the slow, unpredictable half would then infect every test you write
-			about the fast, predictable half.
-		</aside>
-	</section>
-
-	<!-- 2.4 Data flow -->
-	<section>
-		<div class="slide">
-			<header class="slide-head tight">
-				<div class="kicker">OptiServe <span class="sep">/</span> 04 Execution &amp; data flow</div>
-				<h2>One workflow, from live Lambda measurements to a chosen configuration</h2>
-			</header>
-			<div class="slide-body">
-				<ol class="flow three grow">
-					<li><span class="n">1</span><div><div class="ttl">Capture before mutating <span class="an">900 s read timeout &middot; adaptive retries, max_attempts=10</span></div>
-						<div class="dt"><code>ConfigManager.managed()</code> issues <code>GetFunctionConfiguration</code> <b>before any mutation</b>, storing memory, timeout and <code>MODEL_NAME</code> for the <code>finally</code>.</div></div></li>
-
-					<li><span class="n">2</span><div><div class="ttl">Resume or seed <span class="an">run_id = function__model__sha256(params)[:12]</span></div>
-						<div class="dt"><code>Sampler.exploration_init()</code> checks the <code>CheckpointStore</code> for a matching parameter fingerprint; a hit restores samples <i>and</i> the pruned memory space.</div></div></li>
-
-					<li><span class="n">3</span><div><div class="ttl">Apply and verify a memory <span class="an">default space: 2,881 memory steps</span></div>
-						<div class="dt"><code>UpdateFunctionConfiguration</code>, block on the <code>function_updated</code> waiter, then <b>verify</b> memory and <code>MODEL_NAME</code> actually settled &mdash; a waiter returning is not convergence.</div></div></li>
-
-					<li><span class="n">4</span><div><div class="ttl">Measure the configuration <span class="an">extra samples while CV &gt; 5 %, up to 8</span></div>
-						<div class="dt"><code>Explorer</code> fires one throwaway invocation to force a cold start, then fans out N concurrent invokes through a <code>ThreadPoolExecutor</code>.</div></div></li>
-
-					<li><span class="n">5</span><div><div class="ttl">Parse and type failures <span class="an">markers first, numeric check as second signal</span></div>
-						<div class="dt">Extracts <code>Billed Duration</code> from both the text <code>REPORT</code> line and the JSON <code>platform.report</code>, raising typed <code>FunctionTimeout</code> / <code>NotEnoughMemory</code>.</div></div></li>
-
-					<li><span class="n">6</span><div><div class="ttl">Fit, then pick the next memory <span class="an">&sigma; = 200 MB &middot; converges in ~5&ndash;20 configurations</span></div>
-						<div class="dt"><code>Objective</code> adds a Gaussian bump, <code>ParamFunction</code> refits <code>rt(m)=a₀+a₁e^(−m/a₂)</code> warm-started, then <code>argmin(cost &times; knowledge)</code> over the live space.</div></div></li>
-
-					<li class="flow-phase" style="grid-column:1/-1;">&darr; the seam &mdash; below this line there is no AWS, no randomness, no I/O</li>
-
-					<li><span class="n">7</span><div><div class="ttl">Cross the seam <span class="an">App3: 3 nodes &middot; 1/4/4 variants &middot; 16/16/10 steps</span></div>
-						<div class="dt"><code>add_ml_function</code> evaluates every variant&rsquo;s curve at every grid point into <code>perf_profile[variant][memory]</code>.</div></div></li>
-
-					<li><span class="n">8</span><div><div class="ttl">Model the application <span class="an">SFN overhead 18.81 ms/state, 1 ms/edge</span></div>
-						<div class="dt"><b>Copies</b> the graph, de-loops with <code>update_ne</code> (self-loops &rarr; <code>ne/(1−p)</code>), reduces to a simple DAG, then evaluates latency and cost. <b>Memoization is opt-in.</b></div></div></li>
-
-					<li><span class="n">9</span><div><div class="ttl">Optimize, then score against truth <span class="an">greedy result vs. brute-forced ground truth</span></div>
-						<div class="dt">Four corner configurations give the feasible envelope; greedy PRCP returns an <code>OptimizationResult</code>, which the evaluation harness scores against the brute-forced CSV.</div></div></li>
-				</ol>
-				<div class="note" style="flex:0 0 auto;"><b>The steps are the architecture.</b> Steps 1&ndash;6 change a real AWS account, cost money, and give slightly different numbers each time.
-					Steps 7&ndash;9 touch nothing, cost nothing, and give identical results every time. <b>Anything I could make repeatable, I moved past step&nbsp;7</b> &mdash; which is why the tests and the published numbers can be reproduced.</div>
-			</div>
-			<div class="crumb">OptiServe &mdash; 4 / 6</div>
-		</div>
-		<aside class="notes">
-			Step 3 is the one to linger on — "a waiter returning is not the same as convergence" is a
-			real distributed-systems lesson and it came from a real bug. Step 1's eager capture plus the
-			finally is the answer to "what happens if it crashes mid-sweep": the customer's function is
-			restored exactly as found, including removing MODEL_NAME if it wasn't there.
-		</aside>
-	</section>
-
-	<!-- 2.5 Metrics -->
-	<section>
-		<div class="slide">
-			<header class="slide-head tight">
-				<div class="kicker">OptiServe <span class="sep">/</span> 05 Metrics &amp; engineering impact</div>
-				<h2>Every number here is in the repo, or you can re-run the command that produced it</h2>
-			</header>
-			<div class="slide-body">
-				<div class="g4">
-					<div class="metric"><div class="v">~1,300&times;</div><div class="l">acquisition-function speed-up</div><div class="d"><code>update_knowledge</code> 0.71 s &rarr; 0.0005 s, <b>bit-identical</b> output</div><span class="chip measured">measured</span></div>
-					<div class="metric"><div class="v">2.99&times;</div><div class="l">memoized three-strategy run</div><div class="d">App3 420 &rarr; 141 ms, byte-identical CSV. <b>Opt-in; off by default</b></div><span class="chip measured">measured</span></div>
-					<div class="metric"><div class="v">~14,000</div><div class="l">control-plane calls removed</div><div class="d">Avoidable AWS API calls on a 2,881-step sweep</div><span class="chip measured">measured</span></div>
-					<div class="metric"><div class="v">0 &rarr; 76&ndash;100<span class="u">%</span></div><div class="l">coverage of <code>optiserve/aws/</code></div><div class="d">Repo total 73 &rarr; <b>85 % with integration</b>, 80 % offline; CI floor 75 %</div><span class="chip measured">measured</span></div>
-				</div>
-
-				<div class="g-3-2 grow">
-					<div class="card">
-						<div class="card-t neutral">Optimizer quality &mdash; greedy vs. brute-forced ground truth, from the committed <code>App*_accuracy.npy</code></div>
-						<table class="ctab">
-							<thead><tr><th>Strategy</th><th>n</th><th>Mean</th><th>Exactly optimal</th><th>5th pct</th><th>Worst</th></tr></thead>
-							<tbody>
-								<tr><td class="nm">BCPC <span class="muted" style="font-weight:400;">min cost</span></td><td class="tech">852</td><td class="rsp"><b>98.62 %</b></td><td class="rsp">92.3 %</td><td class="rsp">98.3 %</td><td class="rsp">63.2 %</td></tr>
-								<tr><td class="nm">BPBC <span class="muted" style="font-weight:400;">min latency</span></td><td class="tech">554</td><td class="rsp"><b>96.77 %</b></td><td class="rsp">73.8 %</td><td class="rsp">86.2 %</td><td class="rsp">45.6 %</td></tr>
-								<tr><td class="nm">BAPB <span class="muted" style="font-weight:400;">max accuracy</span></td><td class="tech">952</td><td class="rsp"><b>95.67 %</b></td><td class="rsp">78.9 %</td><td class="rsp">72.7 %</td><td class="rsp"><b style="color:var(--rose);">0.0 %</b></td></tr>
-							</tbody>
-						</table>
-						<div class="note" style="border-style:solid;border-color:var(--line);background:var(--surface-2);">
-							<b>I point at the worst-case column on purpose.</b> One strategy scores 0&nbsp;% on one test case. That number is the reason to trust the rest:
-							it means I actually looked. It also tells me which strategy I&rsquo;d ship as-is (<b>BCPC</b>) and which I&rsquo;d put a guard on (<b>BAPB</b>).
-						</div>
-					</div>
-
-					<div class="stack">
-						<div class="card">
-							<div class="card-t">Where the time actually went</div>
-							<ul class="bul sm">
-								<li>One function was <b>77 % of the total runtime</b>. Over half of that only depended on the pipeline&rsquo;s shape, not its numbers &mdash; which is why caching on shape alone was safe.</li>
-								<li>I don&rsquo;t just claim the search is good. The repo <b>checks every option the slow way</b> and measures how far off the fast way was.</li>
-								<li><b>155 tests</b> &mdash; 137 offline (incl. 8 golden-master) + 18 integration, the latter run <b>twice</b>: in-process <code>moto</code>, then <code>moto-server</code> over HTTP.</li>
-							</ul>
-						</div>
-						<div class="card" style="border-left:4px solid var(--muted);">
-							<div class="card-t neutral">Stated limits</div>
-							<ul class="bul sm" style="--pa:var(--muted);">
-								<li>The benchmark&rsquo;s measured curves <b>aren&rsquo;t in the repo and can&rsquo;t be regenerated without live AWS</b>. The results are committed; a fresh clone can&rsquo;t reproduce them from scratch.</li>
-								<li>This never ran in production and never served real traffic. It&rsquo;s a research project with a good test suite, not a live service.</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">OptiServe &mdash; 5 / 6</div>
-		</div>
-		<aside class="notes">
-			The 1,300x number invites "so your profiler was slow?" — the honest answer is yes, and the
-			fix was replacing a Python loop with a NumPy kernel, verified bit-identical. Bit-identical is
-			the part that matters: a speed-up that changes the answer is not a speed-up.
-			If they ask about the 0% worst case: it's one App1 constraint point where the greedy first
-			phase saturates the accuracy constraint and leaves nothing to spend.
-		</aside>
-	</section>
-
-	<!-- 2.6 Trade-offs -->
-	<section>
-		<div class="slide">
-			<header class="slide-head tight">
-				<div class="kicker">OptiServe <span class="sep">/</span> 06 Trade-offs &amp; learnings</div>
-				<h2>What I chose, what it cost me, and what broke</h2>
-			</header>
-			<div class="slide-body">
-				<div class="g3">
-					<div class="to">
-						<div class="axis">How to search</div>
-						<div class="pick"><span class="yes">Greedy critical-path (PRCP)</span><span class="vs">over</span><span class="no">exhaustive / ILP / Bayesian</span></div>
-						<p class="why">Checking everything means 10<sup>17</sup> options on a ten-step pipeline. The greedy approach is also <b>easy to explain</b>: you can point at which step got the next MB, and why.</p>
-						<p class="cost"><b>Cost:</b> no optimality guarantee. Paid for by brute-forcing ground truth and publishing the gap, tail included.</p>
-					</div>
-					<div class="to">
-						<div class="axis">Where to split the system</div>
-						<div class="pick"><span class="yes">One bridge method</span><span class="vs">over</span><span class="no">a live-AWS optimizer</span></div>
-						<p class="why">Keeping everything unpredictable on one side of that method makes the other side <b>give identical results every run, and free to test</b>.</p>
-						<p class="cost"><b>Cost:</b> the discrete memory grid loses resolution the continuous curve had.</p>
-					</div>
-					<div class="to">
-						<div class="axis">Fixing bugs vs. keeping results comparable</div>
-						<div class="pick"><span class="yes">Named compat flags</span><span class="vs">over</span><span class="no">just fixing it</span></div>
-						<p class="why">I found two bugs I couldn&rsquo;t just fix. Fixing them changed numbers that my tests had locked in. So each one became a <b>named on/off switch</b>, with saved results for both settings. A test checks the two results really are different, so a switch can never quietly stop doing anything.</p>
-						<p class="cost"><b>Cost:</b> two code paths forever; <b>two flags are still declared but ungated</b>.</p>
-					</div>
-				</div>
-
-				<div class="g-1-2 grow">
-					<div class="card tint">
-						<div class="card-t">The thing I most want to remember</div>
-						<p style="font-size:18px;line-height:1.5;">A cache that returns an <b>almost right</b> number is worse than no cache at all.</p>
-						<p style="font-size:16px;line-height:1.45;color:var(--muted);">So the cache key uses the <b>exact numbers</b>, never rounded ones. If someone is going to publish your output,
-							a tiny difference that only shows up when caching is on is a bug you will never track down.</p>
-					</div>
-					<div class="g2">
-						<div class="card">
-							<div class="card-t" style="color:var(--cyan);">Edge cases handled</div>
-							<ul class="risk edge">
-								<li><b>Settings that can&rsquo;t work.</b> If a run hits out-of-memory or a timeout, that memory size becomes the new minimum. It never tries that range again.</li>
-								<li><b>Cold starts skewing results.</b> One throwaway call per setting absorbs the cold start, so the measurements that count are all warm and comparable.</li>
-								<li><b>Loops and retries.</b> Worked out with a formula for how many times each step runs on average, instead of simulating them.</li>
-								<li><b>AWS saying &ldquo;done&rdquo; isn&rsquo;t done.</b> After AWS reports the update finished, I read the settings back and check they actually changed.</li>
-							</ul>
-						</div>
-						<div class="card">
-							<div class="card-t" style="color:var(--rose);">Failure modes mitigated</div>
-							<ul class="risk fail">
-								<li><b>A crash leaving someone&rsquo;s function modified.</b> Settings are saved up front and restored on every exit path, including being killed.</li>
-								<li><b>Getting rate-limited by AWS.</b> The client slows itself down before AWS has to say no.</li>
-								<li><b>Quietly mixing results from different settings.</b> The saved-progress key includes the settings, so changing one starts a new run.</li>
-								<li><b>Logging breaking the thing it&rsquo;s logging.</b> If writing an event fails, the run carries on regardless.</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">OptiServe &mdash; 6 / 6</div>
-		</div>
-		<aside class="notes">
-			The compat-flag story is the strongest single anecdote in this project — it shows you
-			understand that in a system producing published numbers, "correct" and "comparable" are
-			different requirements and you may have to serve both. Be ready for "why not just version
-			the output?" — answer: because the golden battery is what proves the flag still does
-			something, and a version number doesn't assert that.
-		</aside>
-	</section>
-
-</section>
-<!-- =====================================================================
-     SECTION 3 — GUARDIAN ON DGX SPARK
-     ===================================================================== -->
-<section class="proj-b">
-
-	<!-- 3.0 opener -->
-	<section>
-		<div class="hero">
-			<div class="sec-no">02</div>
-			<div class="eyebrow" style="margin-top:16px;">NVIDIA Spark Hack Toronto &middot; my scope: the inference layer</div>
-			<h1 style="margin-top:12px;font-size:60px;">Guardian on DGX&nbsp;Spark</h1>
-			<div class="rule"></div>
-			<p class="sub">A six-agent emergency-help app was calling a cloud AI API. I moved it onto
-				<em>a single machine in the room</em> &mdash; without changing a line of the app itself.</p>
-			<div class="mstrip" style="margin-top:30px;max-width:1030px;">
-				<div><div class="v">1 file</div><div class="l">in the whole project talks to an AI vendor, so switching providers is a config change</div></div>
-				<div><div class="v">30B / ~3B</div><div class="l">total size vs. how much actually runs per word &mdash; that gap is the whole trick</div></div>
-				<div><div class="v">~16 GB</div><div class="l">NVFP4 checkpoint on disk, down from ~60 GB at BF16</div></div>
-			</div>
-			<div class="pills" style="margin-top:26px;max-width:1030px;">
-				<span>TensorRT-LLM 1.3.0rc15</span><span>Nemotron Nano 30B-A3B</span><span>NVFP4</span><span>GB10 Grace Blackwell</span>
-				<span>FastAPI</span><span>LangGraph</span><span>Docker Compose</span><span>Next.js</span><span>Tailscale</span><span>SSE</span>
-			</div>
-		</div>
-		<aside class="notes">
-			Scope honestly in the first sentence: "six-agent system built by a team at a hackathon; my
-			piece was the inference layer." Then the three things you owned: the abstraction boundary,
-			the engine bake-off, the production deployment.
-		</aside>
-	</section>
-
-	<!-- 3.1 Problem -->
-	<section>
-		<div class="slide">
-			<header class="slide-head">
-				<div class="kicker">Guardian <span class="sep">/</span> 01 Overview &amp; problem</div>
-				<h2>Move a 30-billion-parameter model onto one desktop machine, without rewriting the app</h2>
-			</header>
-			<div class="slide-body">
-				<div class="g3">
-					<div class="card rail">
-						<div class="card-t">Business problem</div>
-						<ul class="bul sm">
-							<li>Guardian handles <b>medical emergencies at home</b>. Sending an elderly person&rsquo;s health data and speech to someone else&rsquo;s API is a privacy risk.</li>
-							<li>Paying per word means an app that&rsquo;s always listening has no cost ceiling.</li>
-							<li>A demo that dies when the venue WiFi dies is not a demo.</li>
-						</ul>
-					</div>
-					<div class="card rail">
-						<div class="card-t">User impact</div>
-						<ul class="bul sm">
-							<li>Everything runs <b>on the machine</b>. Nothing the user says leaves the room.</li>
-							<li>Shrinking the model to <b>~16 GB</b> left enough room to run a second model alongside it.</li>
-							<li>Reachable over a private network, so the demo worked from anywhere &mdash; not just the venue&rsquo;s wifi.</li>
-						</ul>
-					</div>
-					<div class="card rail">
-						<div class="card-t">The engineering challenge</div>
-						<ul class="bul sm">
-							<li>The app was written for <b>one cloud API&rsquo;s behaviour</b>. Local models differ in how they split text, call tools, and think out loud.</li>
-							<li>The machine has <b>one GPU</b> and shared memory. There&rsquo;s no fast dedicated video memory and no second GPU to fall back on.</li>
-							<li>I had to be able to swap the serving engine <b>without touching app code</b>, or I&rsquo;d never have had time to compare three of them in a weekend.</li>
-						</ul>
-					</div>
-				</div>
-
-				<div class="g-2-1 grow">
-					<div class="card" style="border-left:4px solid var(--amber);">
-						<div class="card-t" style="color:var(--amber);">The hardware correction I lead with, before anyone can catch it</div>
-						<div class="g2" style="gap:14px;">
-							<ul class="bul sm" style="--pa:var(--amber);">
-								<li>A DGX <b>Spark</b> is <b>one</b> GPU and a 20-core ARM CPU on a single chip package. The link between them is <b>NVLink-C2C</b> &mdash; <i>not</i> NVSwitch, and <i>not</i> a multi-GPU setup.</li>
-								<li>So there was <b>no tensor parallelism</b>. You can&rsquo;t split a model across GPUs when you only have one.</li>
-							</ul>
-							<ul class="bul sm" style="--pa:var(--amber);">
-								<li>~128 GB of <b>memory shared by the CPU and GPU</b> (121 GiB usable). There&rsquo;s no separate video memory &mdash; <code>nvidia-smi</code> shows none, you check it with <code>free -h</code>.</li>
-								<li>The real constraint isn&rsquo;t how the chips are wired together. It&rsquo;s that this memory runs at <b>~273 GB/s, where a datacentre GPU gets several TB/s</b>.</li>
-							</ul>
-						</div>
-					</div>
-					<div class="card tint">
-						<div class="card-t">Why this is an EvenUp problem</div>
-						<p style="font-size:16.5px;line-height:1.45;">A document platform needs the same gap between its <b>extraction pipeline</b> and <b>whichever model it happens to use this quarter</b>.</p>
-						<p style="font-size:16.5px;line-height:1.45;margin-top:6px;">The pipeline shouldn&rsquo;t know or care whether it&rsquo;s talking to a hosted model or your own.
-							<b>Switching should be a config change, not a migration.</b></p>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">Guardian &mdash; 1 / 6</div>
-		</div>
-		<aside class="notes">
-			Say the hardware correction unprompted and early. Anyone who has touched a Spark knows it's a
-			single-GPU desktop box; claiming NVSwitch or multi-GPU TP is the fastest way to lose the room.
-			The honest story is better anyway — bandwidth-bound decode on LPDDR5X is a more sophisticated
-			observation than "I used tensor parallelism". Keep TP/PP/NVSwitch in your pocket for the
-			forward-looking question about scaling to an H200 node.
-		</aside>
-	</section>
-
-	<!-- 3.2 Ownership -->
-	<section>
-		<div class="slide">
-			<header class="slide-head">
-				<div class="kicker">Guardian <span class="sep">/</span> 02 My role &amp; ownership</div>
-				<h2>I owned the model layer. The rest of the app was the team&rsquo;s.</h2>
-			</header>
-			<div class="slide-body">
-				<div class="g-2-1 grow">
-					<div class="card">
-						<div class="card-t">Three things, in the order I built them</div>
-						<div class="g3" style="gap:13px;">
-							<div>
-								<div class="card-t" style="font-size:11.5px;margin-bottom:7px;"><span class="n">1</span> The abstraction boundary</div>
-								<ul class="bul sm">
-									<li>Every agent talks to <b>one interface</b>, using our own plain data types &mdash; <code>Message</code>, <code>ToolSpec</code>, <code>ToolCall</code>, <code>LLMResponse</code>.</li>
-									<li>The rule is written in the file itself: <i>a vendor&rsquo;s own objects must never leave the adapter</i>.</li>
-									<li><b>Exactly one file imports a vendor library.</b> That&rsquo;s what made comparing three engines possible in a weekend.</li>
-								</ul>
-							</div>
-							<div>
-								<div class="card-t" style="font-size:11.5px;margin-bottom:7px;"><span class="n">2</span> The engine bake-off</div>
-								<ul class="bul sm">
-									<li>Tested <b>Ollama, vLLM and TensorRT-LLM</b> with <b>real conversations from the app</b>, not made-up prompts. The app calls tools, so the benchmark had to as well.</li>
-									<li>Landed on TRT-LLM + a published NVFP4 checkpoint of Nemotron Nano 30B-A3B.</li>
-								</ul>
-							</div>
-							<div>
-								<div class="card-t" style="font-size:11.5px;margin-bottom:7px;"><span class="n">3</span> Production deployment</div>
-								<ul class="bul sm">
-									<li>Ran TensorRT-LLM in a container behind an OpenAI-shaped endpoint, with the app and UI next to it.</li>
-									<li>Tuned the model&rsquo;s memory reservation to <b>88 % of what was free</b> in the shared 121 GiB pool.</li>
-									<li>Gave the engine direct host networking and kept the app isolated &mdash; a deliberate choice, not a default.</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-
-					<div class="stack">
-						<div class="card">
-							<div class="card-t">The bug I&rsquo;d talk about longest</div>
-							<p style="font-size:16px;line-height:1.45;">The model&rsquo;s &ldquo;thinking&rdquo; mode <b>quietly broke the router</b>. I gave it 24 words to pick an agent; it spent all 24 thinking, returned nothing, and
-								<b>every message fell through to the default agent</b>. No error, anywhere.</p>
-							<p style="font-size:16px;line-height:1.45;margin-top:6px;">The fix needed <b>two layers</b>, because the documented setting didn&rsquo;t work on this backend: turn thinking off in the config <i>and</i> put <code>/no_think</code> at the start of the prompt.</p>
-						</div>
-						<div class="card" style="border-left:4px solid var(--amber);">
-							<div class="card-t" style="color:var(--amber);">Not mine</div>
-							<ul class="bul sm" style="--pa:var(--amber);">
-								<li>The <b>six agents, the apps</b> (watch, phone, web) and the product design were my teammates&rsquo; work.</li>
-								<li>I used <b>NVIDIA&rsquo;s published 4-bit model</b>. I didn&rsquo;t shrink it myself.</li>
-								<li><b>I never benchmarked SGLang.</b> I wanted to, and I ran out of weekend.</li>
-								<li>The voice feature exists in the code but <b>wasn&rsquo;t part of what I deployed or measured</b>.</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">Guardian &mdash; 2 / 6</div>
-		</div>
-		<aside class="notes">
-			"I ran out of weekend before I could benchmark SGLang" is a better sentence than any claim
-			you could make about it. The reasoning-mode bug is the strongest story here: it only shows up
-			when you actually run the model, it was silent rather than loud, and the fix needed two layers
-			because the documented knob didn't work on that backend.
-		</aside>
-	</section>
-
-	<!-- 3.3 Architecture -->
-	<section>
-		<div class="slide">
-			<header class="slide-head tight">
-				<div class="kicker">Guardian <span class="sep">/</span> 03 System architecture</div>
-				<h2>One backend, three apps, and a single door every model call goes through</h2>
-			</header>
-			<div class="slide-body">
-				<div class="g-3-2 grow">
-					<!-- DIAGRAM: to swap in a final asset, replace this <pre class="mermaid"> with <img src="docs/guardian-arch.svg" alt="..."> -->
-					<figure class="diagram">
-						<div class="diagram-bar"><span class="t">System architecture</span><span class="id">fig-02 &middot; guardian-arch</span></div>
-						<div class="diagram-stage">
-<pre class="mermaid">
-flowchart TB
-  UI["Next.js dashboard"]
-  WATCH["Wear OS watch"]
-  FLUT["Flutter app"]
-
-  subgraph BE["GUARDIAN-BACKEND :8080 - model-agnostic"]
-    direction LR
-    API["FastAPI /turn"]
-    ROUTER["Hybrid router - keyword, then LLM"]
-    AGENTS["6 specialist agents - bounded tool loop"]
-    TOOLS["Tool registry"]
-    API --> ROUTER --> AGENTS --> TOOLS
-    TOOLS -.-> AGENTS
-  end
-
-  subgraph S["backend/llm - THE SEAM"]
-    direction LR
-    BASE["base.py - neutral DTOs + LLMClient Protocol"]
-    CFG["config.py - all LLM env config"]
-    FACT["factory.py - build_llm"]
-    ADP["openai_compatible.py - the only vendor import"]
-    BASE --> FACT
-    CFG --> FACT
-    FACT --> ADP
-  end
-
-  subgraph E["SERVING BACKENDS - swapped by config"]
-    direction LR
-    TRT["TensorRT-LLM :8000 - NVFP4 Nemotron 30B-A3B"]
-    OMNI["Omni multimodal :8001"]
-    CLOUD["OpenAI cloud"]
-  end
-
-  UI --> BE
-  WATCH --> BE
-  FLUT --> BE
-  BE --> S
-  S --> E
-</pre>
-						</div>
-						<figcaption class="diagram-cap"><b>Everything above the middle box works with any model.</b> The agents, tools and API never touch a vendor&rsquo;s objects, so switching engines is a config change.</figcaption>
-					</figure>
-
-					<div class="stack">
-						<div class="card flush">
-							<table class="ctab dense">
-								<thead><tr><th>Component</th><th>Responsibility</th></tr></thead>
-								<tbody>
-									<tr><td class="nm">Provider seam <span class="tech" style="font-weight:400;">LLMClient Protocol</span></td><td class="rsp">Our own data types, one adapter, one vendor import.</td></tr>
-									<tr><td class="nm">Inference engine <span class="tech" style="font-weight:400;">TRT-LLM AutoDeploy</span></td><td class="rsp">Serves the 4-bit model on an OpenAI-shaped port.</td></tr>
-									<tr><td class="nm">KV-cache budget <span class="tech" style="font-weight:400;">nano_v3_gb10.yaml</span></td><td class="rsp">Reserves <b>88 %</b> of free memory from the shared 121 GiB pool.</td></tr>
-									<tr><td class="nm">Hybrid router <span class="tech" style="font-weight:400;">LangGraph</span></td><td class="rsp">Checks keywords first, then asks the model to pick one of six agents.</td></tr>
-									<tr><td class="nm">Tool-loop agent <span class="tech" style="font-weight:400;">JSON-Schema ToolSpecs</span></td><td class="rsp">Runs tools and calls the model again, capped at 4 rounds.</td></tr>
-									<tr><td class="nm">Deployment <span class="tech" style="font-weight:400;">Compose + Tailscale</span></td><td class="rsp">Engine on host networking, app isolated, reachable over a private network.</td></tr>
-								</tbody>
-							</table>
-						</div>
-						<div class="callout">
-							<div><span class="lead">Three deployment decisions worth 30 seconds each</span>
-								<b>The API runs on :8080</b> because the engine had already taken :8000. I fixed it in the port mapping, so neither service needed a config change.
-								<b>The engine gets direct host networking</b> so there&rsquo;s no extra network hop on every request; the app stays isolated.
-								<b>The address is a private-network IP</b>, because the browser runs on a different device and the URL is baked in at build time.</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">Guardian &mdash; 3 / 6</div>
-		</div>
-		<aside class="notes">
-			If they ask why base.py matters more than factory.py: the factory is where you choose an
-			adapter, but base.py is where you decide that a choice is *possible* — it's the DTO set that
-			makes two engines substitutable. The docstring invariant is the design.
-		</aside>
-	</section>
-
-	<!-- 3.4 Data flow -->
-	<section>
-		<div class="slide">
-			<header class="slide-head tight">
-				<div class="kicker">Guardian <span class="sep">/</span> 04 Execution &amp; data flow</div>
-				<h2>One utterance: <span class="muted" style="font-weight:400;">&ldquo;I feel a little dizzy. What should I do?&rdquo;</span></h2>
-			</header>
-			<div class="slide-body">
-				<ol class="flow grow">
-					<li><span class="n">1</span><div><div class="ttl">Ingress over Tailscale <span class="an">host port 8080</span></div>
-						<div class="dt">Dashboard, Flutter app or watch POSTs <code>{text, patient_id}</code> to the FastAPI turn endpoint. CORS admits Tailscale, LAN and localhost origins.</div></div></li>
-
-					<li><span class="n">2</span><div><div class="ttl">Turn setup and thread hop</div>
-						<div class="dt"><code>take_turn</code> publishes a <code>TranscriptEvent</code> <b>first</b>, so the Live page resets before any step streams; the synchronous graph is dispatched via <code>asyncio.to_thread</code> with a thread-safe <code>emit</code>.</div></div></li>
-
-					<li><span class="n">3</span><div><div class="ttl">Route &mdash; stage 1 <span class="an">zero model tokens</span></div>
-						<div class="dt">Keyword scan over a tuple of emergency phrases. A match reaches the Safety agent directly. &ldquo;Dizzy&rdquo; is not in it, so we fall through.</div></div></li>
-
-					<li><span class="n">4</span><div><div class="ttl">Route &mdash; stage 2 <span class="an">request #1 &middot; max_tokens 24 &middot; temperature 0.0</span></div>
-						<div class="dt">Model classification call. For non-OpenAI providers the adapter sets <code>enable_thinking=false</code> <b>and</b> prepends <code>/no_think</code> &mdash; without <i>both</i>, every turn silently degrades.</div></div></li>
-
-					<li><span class="n">5</span><div><div class="ttl">Agent prefill <span class="an">request #2</span></div>
-						<div class="dt">LangGraph&rsquo;s conditional edge selects the <code>health</code> node, which assembles <code>[system + patient context, *history, user]</code> and advertises its bound tool subset as JSON-Schema <code>ToolSpec</code>s.</div></div></li>
-
-					<li><span class="n">6</span><div><div class="ttl">Wire encode, then the engine <span class="an">KV pool preallocated at 88 % of free memory</span></div>
-						<div class="dt">Neutral DTOs &rarr; OpenAI wire format; POST crosses bridge &rarr; host. <b>Prefill</b> is compute-bound into paged KV blocks; <b>decode</b> is memory-bandwidth-bound, streaming ~1.5 GB of NVFP4 expert weights per step.</div></div></li>
-
-					<li><span class="n">7</span><div><div class="ttl">Parse and normalize <span class="an">one bad tool call degrades; the turn survives</span></div>
-						<div class="dt"><code>nano-v3</code> strips the thinking block, <code>qwen3_coder</code> lifts native tool syntax into OpenAI-shaped <code>tool_calls</code>. Malformed JSON is stashed as <code>{"_raw": ...}</code> rather than raised.</div></div></li>
-
-					<li><span class="n">8</span><div><div class="ttl">Tool execution and loop <span class="an">capped at MAX_TOOL_ROUNDS = 4</span></div>
-						<div class="dt"><code>registry.execute()</code> runs each function, <code>emit("tool_invocation")</code> fires per tool so the dashboard lights up live, results append as <code>role="tool"</code>, then back to step 5 with a longer prompt.</div></div></li>
-
-					<li><span class="n">9</span><div><div class="ttl">Egress <span class="an">2&ndash;5 sequential inference requests per user turn</span></div>
-						<div class="dt">Returns <code>{route, reply, tool_calls}</code>; an <code>AgentReplyEvent</code> streams to SSE subscribers.</div></div></li>
-				</ol>
-				<div class="note"><b>The ratio to internalize:</b> one user-visible turn is <b>2&ndash;5 sequential inference requests</b>, each with a longer prompt than the last.
-					That is the answer to &ldquo;why isn&rsquo;t turn latency just request latency?&rdquo; &mdash; and it is why the keyword fast-path in step 3 is worth having at all.</div>
-			</div>
-			<div class="crumb">Guardian &mdash; 4 / 6</div>
-		</div>
-		<aside class="notes">
-			Step 4 is the bug story's home. Emphasize that the failure was SILENT — empty content, no
-			exception, correct-looking HTTP 200, and every turn quietly routed to `companion`. That's the
-			class of bug that only integration against the real model finds.
-		</aside>
-	</section>
-
-	<!-- 3.5 Metrics -->
-	<section>
-		<div class="slide">
-			<header class="slide-head tight">
-				<div class="kicker">Guardian <span class="sep">/</span> 05 Metrics &amp; engineering impact</div>
-				<h2>What I can prove from the code &mdash; and what I never measured</h2>
-				<p class="dek">This was a weekend hackathon. <em>I&rsquo;d rather tell you where my evidence stops than give you a number that falls apart when you ask about it.</em></p>
-			</header>
-			<div class="slide-body">
-				<div class="g4">
-					<div class="metric"><div class="v">~16 <span class="u">GB</span></div><div class="l">NVFP4 checkpoint on disk</div><div class="d">down from ~60 GB at full precision. The maths and the docs agree, which is a good sign</div><span class="chip reproducible">from repo</span></div>
-					<div class="metric"><div class="v">121 <span class="u">GiB</span></div><div class="l">shared unified pool</div><div class="d">~92 GiB used with both models loaded, ~29 GiB left over</div><span class="chip reproducible">from repo</span></div>
-					<div class="metric"><div class="v">0.88</div><div class="l">KV-cache free-memory fraction</div><div class="d">Tuned so both models fit at once without running out of memory</div><span class="chip reproducible">from repo</span></div>
-					<div class="metric"><div class="v">600 <span class="u">s</span></div><div class="l">cold-start healthcheck budget</div><div class="d">40 retries. Loading the engine takes minutes, not seconds</div><span class="chip reproducible">from repo</span></div>
-				</div>
-
-				<div class="g2 grow">
-					<div class="card">
-						<div class="card-t">The bandwidth argument, as a model with stated assumptions</div>
-						<p style="font-size:15.5px;line-height:1.4;color:var(--muted);">Generating text is limited by memory speed, not compute. To write one word the machine reads the active weights from memory, so
-							<code>words/sec &asymp; memory speed &divide; bytes per word</code>. This box runs at <b>~273 GB/s</b>; an H100 gets ~3.35 TB/s. Assume ~70 % of peak.</p>
-						<table class="ctab">
-							<thead><tr><th>Precision</th><th>Bytes/token (3B active)</th><th>Ceiling @ ~190 GB/s</th></tr></thead>
-							<tbody>
-								<tr><td class="nm">BF16</td><td class="tech">~6 GB</td><td class="rsp">~30 tok/s</td></tr>
-								<tr><td class="nm">FP8</td><td class="tech">~3 GB</td><td class="rsp">~60 tok/s</td></tr>
-								<tr><td class="nm"><b>NVFP4</b></td><td class="tech"><b>~1.5 GB</b></td><td class="rsp"><b>~125 tok/s</b></td></tr>
-							</tbody>
-						</table>
-						<div class="note" style="background:var(--amber-soft);border-color:#fde68a;border-style:solid;">
-							<b>This is a calculation, not something I measured.</b> On this hardware, shrinking the model isn&rsquo;t a nice-to-have &mdash;
-							it&rsquo;s the difference between a demo that feels responsive and one that doesn&rsquo;t.
-						</div>
-					</div>
-
-					<div class="card" style="border-left:4px solid var(--muted);">
-						<div class="card-t neutral">The ledger I did not fill</div>
-						<p style="font-size:15.5px;line-height:1.42;color:var(--muted);">These aren&rsquo;t in the repo and I didn&rsquo;t log them, so I won&rsquo;t quote them:</p>
-						<div class="g2" style="gap:8px;">
-							<ul class="bul sm" style="--pa:var(--faint);">
-								<li>Batch-1 decode tok/s, per engine</li>
-								<li>TTFT, TRT-LLM vs. alternatives</li>
-								<li>End-to-end <code>/turn</code> p50 / p95</li>
-							</ul>
-							<ul class="bul sm" style="--pa:var(--faint);">
-								<li>Aggregate tok/s at concurrency 1&ndash;16</li>
-								<li>Peak resident memory, model vs. model + KV</li>
-								<li>Accuracy / perplexity deltas across precisions</li>
-							</ul>
-						</div>
-						<div class="callout" style="margin-top:auto;">
-							<div>What I <b>did</b> check: whether the model still called tools correctly, across a fixed set of test prompts. &ldquo;I didn&rsquo;t measure quality scores, but tool calls kept working after shrinking the model&rdquo;
-								is something I can defend. <b>A made-up &ldquo;847 ms down to 193 ms&rdquo; is not.</b></div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">Guardian &mdash; 5 / 6</div>
-		</div>
-		<aside class="notes">
-			This slide is a deliberate bet: that a hiring manager values calibration over decoration.
-			Deliver it without apology — "hackathon, and I didn't instrument it; here's the model I
-			reasoned from and here's what I'd measure first on Monday." If they push for a number,
-			give the ceiling and label it a ceiling.
-		</aside>
-	</section>
-
-	<!-- 3.6 Trade-offs -->
-	<section>
-		<div class="slide">
-			<header class="slide-head tight">
-				<div class="kicker">Guardian <span class="sep">/</span> 06 Trade-offs &amp; learnings</div>
-				<h2>What I chose, what it cost me, and what broke</h2>
-			</header>
-			<div class="slide-body">
-				<div class="g3">
-					<div class="to">
-						<div class="axis">Model precision</div>
-						<div class="pick"><span class="yes">NVFP4</span><span class="vs">over</span><span class="no">FP8 / INT4 AWQ</span></div>
-						<p class="why">It reads <b>half as much memory as FP8</b> per word (4&times; less than full precision). And on this GPU the maths itself runs at 4-bit. Other 4-bit methods only shrink storage &mdash; they unpack back to 16-bit before multiplying, so you save memory but not compute.</p>
-						<p class="cost"><b>Cost:</b> some accuracy loss I couldn&rsquo;t put a number on, because I had no quality benchmark. FP8 was my fallback.</p>
-					</div>
-					<div class="to">
-						<div class="axis">Serving engine</div>
-						<div class="pick"><span class="yes">TensorRT-LLM</span><span class="vs">over</span><span class="no">Ollama / vLLM</span></div>
-						<p class="why">It had native 4-bit support for this GPU and handled several requests at once. Ollama was the easy baseline that proved the swap worked at all; vLLM was the sensible middle option.</p>
-						<p class="cost"><b>Cost:</b> a 10-minute startup, a pre-release build, and a backend that <b>ignored a documented setting</b>.</p>
-					</div>
-					<div class="to">
-						<div class="axis">Container networking</div>
-						<div class="pick"><span class="yes">Host for the engine, bridge for the app</span><span class="vs">over</span><span class="no">uniform bridge</span></div>
-						<p class="why">The engine skips a network translation step on every request. The app stays isolated and reaches back across. Two different setups on purpose, not by accident.</p>
-						<p class="cost"><b>Cost:</b> a port clash to sort out, and two networking styles to keep straight in one file.</p>
-					</div>
-				</div>
-
-				<div class="g-1-2 grow">
-					<div class="card tint">
-						<div class="card-t">The thing I most want to remember</div>
-						<p style="font-size:18px;line-height:1.5;">Matching an API&rsquo;s shape isn&rsquo;t the same as matching how it <b>behaves</b>.</p>
-						<p style="font-size:16px;line-height:1.45;color:var(--muted);">The format was identical and every response came back as a valid HTTP 200.
-							It still broke, because <b>the model spent its whole budget thinking</b> and returned nothing. No type check would have caught that.</p>
-					</div>
-					<div class="g2">
-						<div class="card">
-							<div class="card-t" style="color:var(--cyan);">Edge cases handled</div>
-							<ul class="risk edge">
-								<li><b>Broken JSON from a shrunk model.</b> Saved as raw text instead of throwing an error, so one bad tool call doesn&rsquo;t kill the whole reply.</li>
-								<li><b>Runaway tool loops.</b> Hard cap at <code>MAX_TOOL_ROUNDS = 4</code>.</li>
-								<li><b>One patient&rsquo;s data leaking into another&rsquo;s.</b> Switching patients reloads their profile and clears the conversation history.</li>
-								<li><b>The API address is fixed at build time.</b> Private-network IP first, local-wifi IP as backup &mdash; the browser runs on a different device than the server.</li>
-							</ul>
-						</div>
-						<div class="card">
-							<div class="card-t" style="color:var(--rose);">Failure modes mitigated</div>
-							<ul class="risk fail">
-								<li><b>The router silently falling back to a default</b> whenever the model started thinking &mdash; fixed in two places, because the documented setting didn&rsquo;t work.</li>
-								<li><b>Timeouts set for a cloud model.</b> Raised from 60 s to 120 s for the slower local one. That&rsquo;s a config value, not something I measured.</li>
-								<li><b>Re-downloading 16 GB with hours left on the clock.</b> The model cache lives outside the container, so rebuilding never re-downloads it.</li>
-								<li><b>Two models fighting over the same memory.</b> Capped up front at 88 %, rather than finding the limit by crashing.</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">Guardian &mdash; 6 / 6</div>
-		</div>
-		<aside class="notes">
-			The AWQ/GPTQ-vs-NVFP4 distinction is the highest-signal technical sentence in this project:
-			weight-only quantization saves bandwidth but dequantizes before the matmul, so tensor cores
-			still run at 16-bit rates. NVFP4 on Blackwell executes the GEMM at 4-bit. Say it once, cleanly.
-		</aside>
-	</section>
-
-</section>
-<!-- =====================================================================
-     SECTION 4 — BAKERYPILOT
-     ===================================================================== -->
-<section class="proj-c">
-
-	<!-- 4.0 opener -->
-	<section>
-		<div class="hero">
-			<div class="sec-no">03</div>
-			<div class="eyebrow" style="margin-top:16px;">TMLS Hackathon &middot; 322 commits</div>
-			<h1 style="margin-top:12px;font-size:62px;">BakeryPilot</h1>
-			<div class="rule"></div>
-			<p class="sub">An AI agent connected to a real database that <em>cannot change anything without a person clicking approve</em>.
-				Plus a proxy tuned so you watch the system think, instead of watching a spinner.</p>
-			<div class="mstrip" style="margin-top:30px;max-width:1030px;">
-				<div><div class="v">0</div><div class="l">ways the agent can change real data on its own &mdash; blocked by design, not by prompt wording</div></div>
-				<div><div class="v">34 / 47 / 35 / 5</div><div class="l">tables, foreign keys, check rules, and guards that block edits to history</div></div>
-				<div><div class="v">125</div><div class="l">API endpoints &mdash; the agent uses the same ones a person does, with no shortcuts</div></div>
-			</div>
-			<div class="pills" style="margin-top:26px;max-width:1030px;">
-				<span>FastAPI</span><span>LangGraph</span><span>PostgreSQL 16</span><span>SQLAlchemy 2.x async</span><span>asyncpg</span>
-				<span>Redis 7</span><span>MongoDB 7</span><span>nginx 1.27</span><span>Next.js 15</span><span>Docker Compose</span>
-				<span>GitHub Actions</span><span>Alembic</span><span>SSE</span>
-			</div>
-		</div>
-		<aside class="notes">
-			Lead with the HITL gate, not the chat UI. "An LLM with no unattended write path" is the
-			sentence that connects to their "prove it in court" problem. The 322 commits number is there to
-			signal this was built, not scaffolded.
-		</aside>
-	</section>
-
-	<!-- 4.1 Problem -->
-	<section>
-		<div class="slide">
-			<header class="slide-head">
-				<div class="kicker">BakeryPilot <span class="sep">/</span> 01 Overview &amp; problem</div>
-				<h2>How do you let an AI touch real business data without letting it break anything?</h2>
-			</header>
-			<div class="slide-body">
-				<div class="g3">
-					<div class="card rail">
-						<div class="card-t">Business problem</div>
-						<ul class="bul sm">
-							<li>To answer <i>&ldquo;can we make 5,000 croissants in Toronto?&rdquo;</i>, a bakery manager has to <b>check stock, recipes and schedules by hand</b> across separate systems.</li>
-							<li>The answer usually means <b>doing something</b> &mdash; move butter from the other plant. That needs approval, a name attached, and a record.</li>
-							<li>An agent that can only answer is a toy. An agent that acts on its own is a liability.</li>
-						</ul>
-					</div>
-					<div class="card rail">
-						<div class="card-t">User impact</div>
-						<ul class="bul sm">
-							<li>Plain-English questions run against <b>real stock, recipes and facilities</b> &mdash; not fake data.</li>
-							<li>Every change shows up as a <b>card someone has to approve</b>, so a person stays accountable.</li>
-							<li>Status updates stream as it works (<i>&ldquo;checking stock levels&rdquo;</i>), so you <b>see what it&rsquo;s doing</b> instead of a spinner.</li>
-						</ul>
-					</div>
-					<div class="card rail">
-						<div class="card-t">The engineering challenge</div>
-						<ul class="bul sm">
-							<li>The rules have to hold no matter who is writing &mdash; the agent, a seed script, the admin API, or a person with a database console.</li>
-							<li>Long-lived <b>streaming responses through a proxy</b> whose default settings break them.</li>
-							<li>Deploying to <b>one live server</b>, where a failed database migration means lost data, not a quick undo.</li>
-						</ul>
-					</div>
-				</div>
-
-				<div class="g-2-1 grow">
-					<div class="card" style="border-left:4px solid var(--amber);">
-						<div class="card-t" style="color:var(--amber);">Three corrections I make before anyone asks</div>
-						<div class="g3" style="gap:14px;">
-							<ul class="bul sm" style="--pa:var(--amber);">
-								<li><b>It isn&rsquo;t GCP.</b> It&rsquo;s one Ubuntu server on <b>OpenStack</b>, deployed by a <b>runner installed on that same server</b>. The skills carry over exactly &mdash; but I say OpenStack, because that&rsquo;s what it is.</li>
-							</ul>
-							<ul class="bul sm" style="--pa:var(--amber);">
-								<li><b>No search-by-meaning shipped.</b> The database extension is installed, but there are <b>no embeddings and no similarity queries</b>. I designed the schema for it, then <b>cut the feature at about 36 hours</b> to protect what already worked.</li>
-							</ul>
-							<ul class="bul sm" style="--pa:var(--amber);">
-								<li><b>No HTTPS.</b> It&rsquo;s plain HTTP on port 80. I wrote up three ways to add TLS instead, which I&rsquo;d rather be able to explain than have copy-pasted one command.</li>
-							</ul>
-						</div>
-					</div>
-					<div class="card tint">
-						<div class="card-t">Why this is an EvenUp problem</div>
-						<p style="font-size:16.5px;line-height:1.45;">&ldquo;Never let an AI write client-facing data without review&rdquo; is <b>the</b> rule in legal tech.</p>
-						<p style="font-size:16.5px;line-height:1.45;margin-top:6px;">Here the <b>structure</b> enforces it: the agent has no way to write to real tables at all.
-							The worst it can do is leave an unapproved card sitting there.</p>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">BakeryPilot &mdash; 1 / 6</div>
-		</div>
-		<aside class="notes">
-			Deliver the three corrections crisply and move on — don't grovel. The vector one is
-			actually a scoping-judgment story, which is worth more to a hiring manager than a
-			half-built RAG layer. "I chose the topology to make consistency free, then descoped the
-			feature" is the line.
-		</aside>
-	</section>
-
-	<!-- 4.2 Ownership -->
-	<section>
-		<div class="slide">
-			<header class="slide-head">
-				<div class="kicker">BakeryPilot <span class="sep">/</span> 02 My role &amp; ownership</div>
-				<h2>The database, the proxy, and the deployment pipeline</h2>
-			</header>
-			<div class="slide-body">
-				<div class="g-2-1 grow">
-					<div class="card">
-						<div class="card-t">Components I own end to end</div>
-						<div class="g2" style="gap:11px;">
-							<div>
-								<ul class="bul sm">
-									<li><b>The database schema and its safety net.</b> 34 tables, <b>47 foreign keys, 35 check rules, and 5 tables you cannot edit or delete from</b>. Corrections are new rows that cancel out the old ones. The database refuses the edit outright.</li>
-									<li><b>The human approval gate.</b> Six kinds of card, each pending until someone accepts or rejects it. Deciding twice is rejected. On approval, the card, the data change and the audit trail all land in <b>one transaction</b>.</li>
-									<li><b>The Nginx proxy.</b> Tuned for long-lived streams: buffering off, caching off, a one-hour read timeout, and reused connections to the backend.</li>
-								</ul>
-							</div>
-							<div>
-								<ul class="bul sm">
-									<li><b>The deploy pipeline.</b> The runner lives on the server, so there are <b>no deployment secrets anywhere</b> &mdash; no SSH key, no service-account file, nothing stored in GitHub. Deploys are queued so two can never overlap.</li>
-									<li><b>Migration safety.</b> A database backup before every schema change, keeping the last 30. Migrations stop on the first error. The proxy config is validated before it&rsquo;s reloaded.</li>
-									<li><b>A three-level prompt store.</b> A short-lived cache first, then MongoDB with a 2-second timeout, then prompt files shipped with the app. If Mongo goes down it stops trying and uses the files.</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-
-					<div class="stack">
-						<div class="card">
-							<div class="card-t">Judgement &amp; communication</div>
-							<ul class="bul sm">
-								<li><b>Made the call to cut a feature.</b> At about 36 hours I dropped search-by-meaning to protect the parts that worked, and kept the schema design that would make it easy to add later.</li>
-								<li>Sorted every dependency by one question: if it goes down, do we give <b>wrong answers, or just fewer features?</b> Only the second kind got a fallback.</li>
-							</ul>
-						</div>
-						<div class="card" style="border-left:4px solid var(--amber);">
-							<div class="card-t" style="color:var(--amber);">Not mine</div>
-							<ul class="bul sm" style="--pa:var(--amber);">
-								<li>The <b>web frontend</b> and the product design were my teammates&rsquo; work.</li>
-								<li>The <b>eight specialist agents</b> and their prompts were a shared effort. I built the tool layer they call through.</li>
-								<li>LangGraph, SQLAlchemy, Alembic and Nginx do the heavy lifting for orchestration, database access, migrations and proxying.</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">BakeryPilot &mdash; 2 / 6</div>
-		</div>
-		<aside class="notes">
-			The one-liner for the schema work: "Application validation protects this version of the
-			code. Database constraints protect every future version and every path that isn't mine."
-			That sentence is why the triggers are in the database and not in the ORM.
-		</aside>
-	</section>
-
-	<!-- 4.3 Architecture -->
-	<section>
-		<div class="slide">
-			<header class="slide-head tight">
-				<div class="kicker">BakeryPilot <span class="sep">/</span> 03 System architecture</div>
-				<h2>One VM, one public port, and a human between the agent and the data</h2>
-			</header>
-			<div class="slide-body">
-				<div class="g-3-2 grow">
-					<!-- DIAGRAM: to swap in a final asset, replace this <pre class="mermaid"> with <img src="docs/bakerypilot-arch.svg" alt="..."> -->
-					<figure class="diagram">
-						<div class="diagram-bar"><span class="t">System architecture</span><span class="id">fig-03 &middot; bakerypilot-arch</span></div>
-						<div class="diagram-stage">
-<pre class="mermaid">
-flowchart TB
-  Browser["Operator browser - hand-rolled SSE reader"]
-  Nginx["nginx 1.27 - the only public port 80 - proxy_buffering off"]
-  Frontend["frontend :3000 - Next.js 15 SSR"]
-
-  subgraph App["BACKEND :8000 - agent imported in-process"]
-    direction LR
-    Routers["29 routers - 125 REST endpoints"]
-    Graph["LangGraph orchestrator"]
-    Agents["8 specialist agents"]
-    Tools["httpx tools - clients of the same API"]
-    Routers --> Graph --> Agents --> Tools
-    Tools -.->|"internal hostname"| Routers
-  end
-
-  subgraph Gate["HUMAN-IN-THE-LOOP GATE"]
-    direction LR
-    Cards["action_cards row - state pending"]
-    Human["Operator confirms"]
-    Execs["6 deterministic executors"]
-    Cards --> Human --> Execs
-  end
-
-  subgraph Stores["STORAGE TIER - internal only"]
-    direction LR
-    Postgres["PostgreSQL 16 - 34 tables, append-only triggers"]
-    Redis["Redis 7 - events and cache"]
-    Mongo["MongoDB 7 - versioned prompts"]
-  end
-
-  Browser -->|"HTTP :80"| Nginx
-  Nginx --> Frontend
-  Nginx -->|"regex /api"| App
-  App --> Gate
-  App --> Stores
-  Gate -->|"one transaction"| Stores
-  App -.->|"SSE frames"| Browser
-</pre>
-						</div>
-						<figcaption class="diagram-cap"><b>The agent isn&rsquo;t a separate service.</b> It runs inside the backend and reads data through the same public API a person uses &mdash; no direct database access, no shortcuts.</figcaption>
-					</figure>
-
-					<div class="stack">
-						<div class="card flush">
-							<table class="ctab dense">
-								<thead><tr><th>Component</th><th>Responsibility</th></tr></thead>
-								<tbody>
-									<tr><td class="nm">Nginx ingress <span class="tech" style="font-weight:400;">1.27-alpine</span></td><td class="rsp">Only public port; <code>proxy_buffering off</code> so SSE actually streams.</td></tr>
-									<tr><td class="nm">FastAPI backend <span class="tech" style="font-weight:400;">uvicorn --proxy-headers</span></td><td class="rsp">29 routers, 125 endpoints; strict layering; three-tier validation.</td></tr>
-									<tr><td class="nm">LangGraph <span class="tech" style="font-weight:400;">in-process import</span></td><td class="rsp">Classifies intent, routes to 8 specialists, runs bounded ReAct loops.</td></tr>
-									<tr><td class="nm">Agent tool layer <span class="tech" style="font-weight:400;">httpx, timeout=10</span></td><td class="rsp">Ordinary API clients &mdash; every constraint on a human applies to them.</td></tr>
-									<tr><td class="nm">HITL gate <span class="tech" style="font-weight:400;">action_cards + jsonb</span></td><td class="rsp">Six card kinds stay pending until a human confirms; one commit.</td></tr>
-									<tr><td class="nm">Postgres SoR <span class="tech" style="font-weight:400;">SQLAlchemy 2.x async</span></td><td class="rsp">34 tables, 32 indexes, 47 FKs, 35 CHECKs, 5 append-only triggers.</td></tr>
-								</tbody>
-							</table>
-						</div>
-						<div class="callout">
-							<div><span class="lead">The decision I&rsquo;d bring up before being asked</span>
-								In development there&rsquo;s an <code>agent</code> container. In production it&rsquo;s <b>turned off</b>, because its startup command just runs eight test prompts and exits &mdash;
-								it would restart forever. <b>Turning a would-be microservice into a plain import</b> removed a network hop, a health check and a restart loop.
-								It cost nothing, because the agent never needed to scale on its own.</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">BakeryPilot &mdash; 3 / 6</div>
-		</div>
-		<aside class="notes">
-			If they ask "why is the agent calling your own REST API over HTTP instead of just using the
-			ORM?" — that IS the security model. It means the agent inherits every validation, every
-			permission check, and every constraint the REST layer enforces, with no bypass to maintain.
-			The cost is a loopback hop that never leaves the bridge network.
-		</aside>
-	</section>
-
-	<!-- 4.4 Data flow -->
-	<section>
-		<div class="slide">
-			<header class="slide-head tight">
-				<div class="kicker">BakeryPilot <span class="sep">/</span> 04 Execution &amp; data flow</div>
-				<h2>One question: <span class="muted" style="font-weight:400;">&ldquo;can we make 5,000 croissants at the Toronto plant?&rdquo;</span></h2>
-			</header>
-			<div class="slide-body">
-				<ol class="flow grow">
-					<li><span class="n">1</span><div><div class="ttl">Request enters <span class="an">keepalive 32/upstream &middot; client_max_body_size 25m</span></div>
-						<div class="dt"><code>streamChat()</code> POSTs <code>/api/chat</code> with an <code>AbortController</code>; the Nginx regex location proxies to <code>backend:8000</code>, stamping the four <code>X-Forwarded-*</code>/<code>Host</code> headers.</div></div></li>
-
-					<li><span class="n">2</span><div><div class="ttl">Headers, CORS, validation <span class="an">422 before any handler code runs</span></div>
-						<div class="dt">uvicorn rewrites the request scope from forwarded headers so the app sees the true client IP and scheme; the <code>ChatRequest</code> Pydantic model rejects malformed bodies.</div></div></li>
-
-					<li><span class="n">3</span><div><div class="ttl">SSE stream opens <span class="an">proxy_read_timeout 3600s API / 300s frontend</span></div>
-						<div class="dt"><code>EventSourceResponse</code> wraps an async generator. <b>Nothing is buffered</b> &mdash; the first <code>status</code> frame reaches the browser in milliseconds, before the LLM has produced a token.</div></div></li>
-
-					<li><span class="n">4</span><div><div class="ttl">Intent classification <span class="an">MemorySaver checkpointer per thread_id</span></div>
-						<div class="dt"><code>_graph.astream()</code> walks <code>classify_intent</code>; a conditional edge routes to one of 8 specialists. An <code>InMemoryStore</code> carries cross-turn memory, so <i>&ldquo;and at the Mississauga plant?&rdquo;</i> resolves next turn.</div></div></li>
-
-					<li><span class="n">5</span><div><div class="ttl">Progressive status <span class="an">only works because Nginx isn&rsquo;t buffering</span></div>
-						<div class="dt">The handler counts graph emissions: #1 means classification finished, so it emits the resolved intent as human-readable status; #2 means the specialist finished.</div></div></li>
-
-					<li><span class="n">6</span><div><div class="ttl">Tools over REST <span class="an">explicit timeout=10 on every httpx call</span></div>
-						<div class="dt">A ReAct loop over a bounded tool set: <code>resolve_product_sku</code> &rarr; <code>get_product_recipe</code> &rarr; <code>query_lots</code>, then multiply <code>kg_per_unit &times; 5000</code> per ingredient and find the bottleneck.</div></div></li>
-
-					<li><span class="n">7</span><div><div class="ttl">Action card drafted <span class="an">zero domain rows written at this point</span></div>
-						<div class="dt"><code>draft_lot_transfer</code> <b>does not move inventory.</b> It inserts one <code>action_cards</code> row with <code>state='pending'</code> and a <code>jsonb</code> payload; the fenced card id is stripped from the prose.</div></div></li>
-
-					<li><span class="n">8</span><div><div class="ttl">Tokens stream back <span class="an">12 ms cadence &middot; whitespace-preserving tokenizer</span></div>
-						<div class="dt">Client-side, a hand-rolled SSE parser over a <code>ReadableStream</code> &mdash; because the browser&rsquo;s <code>EventSource</code> only issues GET, and this endpoint is a POST carrying history.</div></div></li>
-
-					<li><span class="n">9</span><div><div class="ttl">Human confirms, FEFO executes <span class="an">409 on re-decide &middot; one transaction, one commit</span></div>
-						<div class="dt">The transfer executor draws lots <b>expiry-ascending</b>, re-homes or splits each, writes <code>inventory_events</code> rows, and records unsatisfied remainder as <code>kg_unsatisfied</code> &mdash; <b>the audit trail records the shortfall rather than silently succeeding.</b></div></div></li>
-				</ol>
-				<div class="note"><b>The property worth stating out loud:</b> there is no intermediate state where a card reads <code>confirmed</code> but the stock never moved.
-					Every state change carries a <code>decided_by</code> and a <code>decided_at</code>; every inventory effect is a row in an immutable log.
-					<b>You can reconstruct who approved what, when, and what it did.</b></div>
-			</div>
-			<div class="crumb">BakeryPilot &mdash; 4 / 6</div>
-		</div>
-		<aside class="notes">
-			Step 8's "why not EventSource" is a great small answer: EventSource is GET-only, the chat
-			endpoint is a POST with a body. The same file DOES use EventSource for /api/events, which
-			is a GET — so it's a considered choice, not ignorance of the API.
-		</aside>
-	</section>
-
-	<!-- 4.5 Metrics -->
-	<section>
-		<div class="slide">
-			<header class="slide-head tight">
-				<div class="kicker">BakeryPilot <span class="sep">/</span> 05 Metrics &amp; engineering impact</div>
-				<h2>Counts I can prove by opening a file in front of you</h2>
-			</header>
-			<div class="slide-body">
-				<div class="g4">
-					<div class="metric"><div class="v">0</div><div class="l">unattended agent domain writes</div><div class="d">The worst it can do is leave a card sitting unapproved</div><span class="chip reproducible">structural</span></div>
-					<div class="metric"><div class="v">125 / 29</div><div class="l">endpoints / routers</div><div class="d">67 GET &middot; 43 POST &middot; 6 PATCH &middot; 5 DELETE &middot; 4 PUT</div><span class="chip reproducible">from repo</span></div>
-					<div class="metric"><div class="v">143</div><div class="l">Python tests</div><div class="d">91 backend + 52 agent, in <b>2 of the 3</b> parallel CI jobs. The third runs the frontend tests</div><span class="chip reproducible">from repo</span></div>
-					<div class="metric"><div class="v">0</div><div class="l">deployment secrets</div><div class="d">The runner lives on the server, so there&rsquo;s no SSH key or credentials file to leak</div><span class="chip reproducible">structural</span></div>
-				</div>
-
-				<div class="g-3-2 grow">
-					<div class="card">
-						<div class="card-t neutral">The database floor &mdash; every one verified in <code>schema.sql</code></div>
-						<table class="ctab">
-							<thead><tr><th>Guard</th><th>Count</th><th>What it buys</th></tr></thead>
-							<tbody>
-								<tr><td class="nm">Tables / indexes</td><td class="tech">34 / 32</td><td class="rsp">The source of truth. Not reachable from outside the server.</td></tr>
-								<tr><td class="nm">Foreign keys</td><td class="tech">47</td><td class="rsp">Links between tables that stay valid no matter who writes.</td></tr>
-								<tr><td class="nm">CHECK constraints</td><td class="tech">35</td><td class="rsp">Business rules enforced by the database itself.</td></tr>
-								<tr><td class="nm">Append-only triggers</td><td class="tech">5</td><td class="rsp">History can&rsquo;t be edited or deleted. Corrections are new rows.</td></tr>
-								<tr><td class="nm">CD safety</td><td class="tech">30 dumps</td><td class="rsp">A backup before every schema change. Migrations stop on first error.</td></tr>
-							</tbody>
-						</table>
-						<div class="note" style="border-style:solid;border-color:var(--line);background:var(--surface-2);">
-							<b>Why in the database and not the app code:</b> the agent, seed scripts, the admin API and a person at a console all reach those tables by different routes.
-							App-level checks only protect <i>this</i> version of the code. Database rules protect every future version, and every route I didn&rsquo;t write.
-						</div>
-					</div>
-
-					<div class="stack">
-						<div class="card">
-							<div class="card-t">Also true</div>
-							<ul class="bul sm">
-								<li><b>~10,734 LOC backend + ~2,894 LOC agent</b>, 322 commits.</li>
-								<li>The whole test suite <b>runs without a database or an API key</b>, which is why it can run on every push to every branch.</li>
-								<li>Deploys only trigger on relevant file changes, and they queue rather than overlap, so two pushes can never run migrations at the same time.</li>
-							</ul>
-						</div>
-						<div class="card" style="border-left:4px solid var(--muted);">
-							<div class="card-t neutral">Stated limits</div>
-							<ul class="bul sm" style="--pa:var(--muted);">
-								<li><b>No real latency numbers.</b> The ~90 s figure is just <b>30 retries &times; 3 seconds</b> from the config, not something I timed. I&rsquo;d measure properly before quoting response times.</li>
-								<li>One server, one copy of everything. No redundancy at any level.</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">BakeryPilot &mdash; 5 / 6</div>
-		</div>
-		<aside class="notes">
-			"Structural" is the honest chip here: these are counts, not benchmarks. If they ask for
-			latency, say you'd measure it with `ab -n 200 -c 10` and time-to-first-token with
-			`curl -N -w "%{time_starttransfer}"` — naming the command is better than naming a number
-			you didn't measure.
-		</aside>
-	</section>
-
-	<!-- 4.6 Trade-offs -->
-	<section>
-		<div class="slide">
-			<header class="slide-head tight">
-				<div class="kicker">BakeryPilot <span class="sep">/</span> 06 Trade-offs &amp; learnings</div>
-				<h2>What I chose, what it cost me, and what broke</h2>
-			</header>
-			<div class="slide-body">
-				<div class="g3">
-					<div class="to">
-						<div class="axis">How to run the agent</div>
-						<div class="pick"><span class="yes">In-process library import</span><span class="vs">over</span><span class="no">a separate agent service</span></div>
-						<p class="why">It removed a network hop, a health check and a restart loop, and cost nothing &mdash; because the agent <b>never needed to scale separately</b>.</p>
-						<p class="cost"><b>Cost:</b> the backend image has to be built from the <b>repo root</b>, because it depends on the agent folder next door.</p>
-					</div>
-					<div class="to">
-						<div class="axis">Search feature</div>
-						<div class="pick"><span class="yes">Descope semantic retrieval</span><span class="vs">over</span><span class="no">a half-built RAG layer</span></div>
-						<p class="why">I put the vector store <i>inside Postgres</i> so embeddings and rows would save together in one transaction &mdash; <b>consistency for free</b>. Then I cut the feature at ~36 hours to protect what already worked.</p>
-						<p class="cost"><b>Cost:</b> an empty feature sitting there. I say &ldquo;designed, not shipped&rdquo; every time it comes up.</p>
-					</div>
-					<div class="to">
-						<div class="axis">Should deploys wait for tests?</div>
-						<div class="pick"><span class="yes">CD parallel to CI</span><span class="vs">over</span><span class="no">CD gated on CI</span></div>
-						<p class="why">At a hackathon, <b>a flaky test blocking a demo fix</b> was the bigger risk. It was deliberate, and it&rsquo;s written in the workflow file.</p>
-						<p class="cost"><b>Cost:</b> <b>a red build deploys.</b> Correct for a demo, wrong for production &mdash; and it&rsquo;s the first thing I&rsquo;d change.</p>
-					</div>
-				</div>
-
-				<div class="g-1-2 grow">
-					<div class="card tint">
-						<div class="card-t">The thing I most want to remember</div>
-						<p style="font-size:18px;line-height:1.5;">The bug was never the streaming. It was a <b>60-second timeout hiding behind a buffering problem</b>.</p>
-						<p style="font-size:15.5px;line-height:1.42;color:var(--muted);">The chat looked frozen, then dumped everything at once. I called the app directly, bypassing the proxy, and <b>the text arrived bit by bit</b>. So the backend was fine and <b>the proxy was the problem</b>. Working out <i>which layer</i> was at fault was the real work. The one-line fix was the easy part.</p>
-					</div>
-					<div class="g2">
-						<div class="card">
-							<div class="card-t" style="color:var(--cyan);">Edge cases handled</div>
-							<ul class="risk edge">
-								<li><b>Approving the same card twice.</b> The second attempt is rejected, checked before anything runs.</li>
-								<li><b>Transfers that can&rsquo;t be fully filled.</b> The shortfall is written down, so the record shows what was missing instead of quietly claiming success.</li>
-								<li><b>The API address is baked in at build time.</b> Changing the environment variable isn&rsquo;t enough &mdash; the frontend has to be rebuilt.</li>
-								<li><b>MongoDB going down.</b> Three levels of fallback, and once it fails the app stops retrying and uses the bundled files.</li>
-							</ul>
-						</div>
-						<div class="card">
-							<div class="card-t" style="color:var(--rose);">Weak spots I&rsquo;d name before you found them</div>
-							<ul class="risk fail">
-								<li><b>Deploys don&rsquo;t wait for tests.</b> They run side by side, so a failing build still ships.</li>
-								<li><b>There is downtime on deploy.</b> The old container stops before the new one starts, so the site errors for that window.</li>
-								<li><b>No automatic rollback.</b> There&rsquo;s always a backup and a revert-and-push path &mdash; manual, but quick.</li>
-								<li><b>One server, one copy</b> of every service. Nothing is redundant.</li>
-							</ul>
-							<div class="note" style="padding:6px 9px;"><b>The fix I&rsquo;d ship first:</b> blue/green behind the Nginx I already built &mdash; flip the <code>upstream</code> block and <code>nginx -s reload</code>. An upstream swap, not a new architecture.</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">BakeryPilot &mdash; 6 / 6</div>
-		</div>
-		<aside class="notes">
-			Naming your own pipeline's three weaknesses before they find them is the move here. Then
-			immediately give the fix order: gate CD on CI, blue/green for zero-downtime, then redundancy.
-			"Those were correct trade-offs for a hackathon and they're all wrong for production" is the
-			exact framing — it shows you know the difference rather than not knowing the weakness.
-		</aside>
-	</section>
-
-</section>
-<!-- =====================================================================
-     SECTION 5 — APPLIED TO EVENUP + CLOSE
-     ===================================================================== -->
-<section class="proj-d">
-
-	<!-- 5.0 opener -->
-	<section>
-		<div class="hero">
-			<div class="sec-no">04</div>
-			<div class="eyebrow" style="margin-top:16px;">Synthesis</div>
-			<h1 style="margin-top:12px;font-size:64px;">Applied to EvenUp</h1>
-			<div class="rule"></div>
-			<p class="sub">Three projects, three habits I&rsquo;d bring with me. Here is how I&rsquo;d apply them to a
-				pipeline that turns a pile of medical records into structured data you can defend &mdash;
-				and where I&rsquo;d expect to be wrong.</p>
-		</div>
-		<aside class="notes">
-			Transition: "That's the portfolio. I'd rather spend the rest of the time on your problem
-			than on mine." This is the section where you want them interrupting.
-		</aside>
-	</section>
-
-	<!-- 5.1 common threads -->
-	<section>
-		<div class="slide">
-			<header class="slide-head">
-				<div class="kicker">Synthesis <span class="sep">/</span> 01</div>
-				<h2>Three projects, three habits worth keeping</h2>
-			</header>
-			<div class="slide-body">
-				<div class="g3 grow">
-					<div class="card rail">
-						<div class="card-t"><span class="n">1</span> Keep the model behind one door</div>
-						<p style="font-size:16.5px;line-height:1.45;">In each project, the slow and unpredictable part sits behind one small interface.</p>
-						<ul class="bul sm">
-							<li><b>OptiServe:</b> all of AWS is 9 operations in one folder. Nothing outside it talks to AWS.</li>
-							<li><b>Guardian:</b> exactly one file imports a vendor library, so moving from cloud to local was a config edit.</li>
-							<li><b>BakeryPilot:</b> the agent is just another API client. No direct database access, no special privileges.</li>
-						</ul>
-						<div class="note" style="margin-top:auto;"><b>Why it pays off:</b> 137 of OptiServe&rsquo;s 155 tests run with no internet. Easy testing is the reward, not the reason.</div>
-					</div>
-					<div class="card rail">
-						<div class="card-t"><span class="n">2</span> Measure first, then optimize</div>
-						<p style="font-size:16.5px;line-height:1.45;">Every performance claim in this deck comes from a command you could re-run yourself.</p>
-						<ul class="bul sm">
-							<li>OptiServe <b>checks every option the slow way</b>, so the 96&ndash;99&nbsp;% figure is measured, not claimed.</li>
-							<li>The 2.99&times; speed-up came after profiling showed one function was <b>77&nbsp;% of the runtime</b>.</li>
-							<li>Where I never measured something &mdash; Guardian&rsquo;s speed &mdash; this deck says so instead of making a number up.</li>
-						</ul>
-						<div class="note" style="margin-top:auto;"><b>Why it pays off:</b> a number that falls apart under one follow-up question costs more than it was ever worth.</div>
-					</div>
-					<div class="card rail">
-						<div class="card-t"><span class="n">3</span> Make the answer checkable</div>
-						<p style="font-size:16.5px;line-height:1.45;">In all three, the output outlives the run that produced it. Someone will ask about it later.</p>
-						<ul class="bul sm">
-							<li>OptiServe caches on <b>exact numbers</b>, never rounded ones. An almost-right cached answer is worse than no cache.</li>
-							<li>BakeryPilot blocks edits to history <b>in the database itself</b>, not in application code.</li>
-							<li>Forecasts record which model version made them, so v3&rsquo;s answers stay reproducible after v4 ships.</li>
-						</ul>
-						<div class="note" style="margin-top:auto;"><b>Why it pays off:</b> it&rsquo;s what a legal document needs &mdash; who claimed what, from which page, using which model.</div>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">Synthesis &mdash; 1 / 3</div>
-		</div>
-		<aside class="notes">
-			If you only get one slide from this section, make it this one. The third column is the
-			one that connects directly to their "prove it in court" problem — lead with it if they're a
-			product-minded manager rather than an infra one.
-		</aside>
-	</section>
-
-	<!-- 5.2 the design -->
-	<section>
-		<div class="slide">
-			<header class="slide-head tight">
-				<div class="kicker">Synthesis <span class="sep">/</span> 02</div>
-				<h2>Raw medical records &rarr; structured extractions</h2>
-				<p class="dek">Assume a background job with hours to finish, messy scanned PDFs, and a human reviewing before delivery. <em>Speed is not the hard part.</em></p>
-			</header>
-			<div class="slide-body">
-				<div class="g-3-2 grow">
-					<!-- DIAGRAM: swap in a final asset by replacing the <pre class="mermaid"> block with <img src="docs/evenup-pipeline.svg" alt="..."> -->
-					<figure class="diagram">
-						<div class="diagram-bar"><span class="t">Proposed pipeline</span><span class="id">fig-04 &middot; evenup-extraction</span></div>
-						<div class="diagram-stage">
-<pre class="mermaid">
-flowchart TB
-  UP["Client upload"] --> S3R["S3 raw - immutable - key is sha256 of bytes"]
-
-  subgraph ORCH["DURABLE ORCHESTRATION - per case"]
-    direction LR
-    SF["Step Functions or Temporal"] --> SPL["Split + normalize - 1 page = 1 task"]
-  end
-
-  subgraph STG["PER-PAGE STAGES - a queue between each"]
-    direction LR
-    CLS["Classify doc type - cheap model"]
-    OCR["OCR - bypassed if digital text exists"]
-    EXT["Extract - per-doc-type schema"]
-    SUM["Summarize - one pass per case"]
-    CLS --> OCR --> EXT --> SUM
-  end
-
-  subgraph SOR["SYSTEM OF RECORD"]
-    direction LR
-    PG["Postgres facts + provenance - append only, versioned"]
-    DLQ["Dead letter queue - case goes partially complete"]
-  end
-
-  REV["Human review - sampled + low confidence"] --> ASM["Demand package assembly"]
-
-  S3R --> ORCH
-  ORCH --> STG
-  STG --> SOR
-  STG -.->|"N failures"| DLQ
-  SOR --> REV
-</pre>
-						</div>
-						<figcaption class="diagram-cap"><b>Process one page at a time, not one case at a time.</b> If page 3,700 of 4,000 fails, you lose one page &mdash; not the whole case.</figcaption>
-					</figure>
-
-					<div class="stack">
-						<div class="card">
-							<div class="card-t"><span class="n">1</span> Name every file by its contents</div>
-							<p style="font-size:16px;line-height:1.45;">Store each page under a hash of its own bytes. Duplicates disappear for free &mdash; the same record from three providers is stored once &mdash; and
-								that hash plus the stage and model version becomes a natural key for &ldquo;have we already done this?&rdquo;</p>
-						</div>
-						<div class="card">
-							<div class="card-t"><span class="n">2</span> Make skipping work its own step</div>
-							<p style="font-size:16px;line-height:1.45;">Plenty of &ldquo;scanned&rdquo; records already have real text in them. A cheap check that sends those straight past OCR is the highest-value box in the diagram.
-								<b>Then do the same thing one step later:</b> use the small model by default, and only call the big one when confidence is low.</p>
-						</div>
-						<div class="card tint">
-							<div class="card-t">This is OptiServe&rsquo;s idea, applied here</div>
-							<p style="font-size:16px;line-height:1.45;">Pick a different model per step, trading speed against cost against accuracy &mdash; and spend your effort on the step that actually moves the total,
-								not evenly across all of them.</p>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">Synthesis &mdash; 2 / 3</div>
-		</div>
-		<aside class="notes">
-			Spend the first sentences clarifying, not designing: interactive or background? one merged
-			PDF or many files? human review before or after delivery? per-field or per-document accuracy bar?
-			Then name the hard part out loud: (a) a 4,000-page case failing at page 3,700 must not restart;
-			(b) every fact must be traceable to a source page or it is worthless in a legal document;
-			(c) cost is dominated by which model runs on which page, not by infrastructure.
-			Queue-between-every-stage gives backpressure free and isolates poison pills. Avoid Airflow —
-			it is built for scheduled batch DAGs, not 100k concurrent per-entity workflows.
-		</aside>
-	</section>
-
-	<!-- 5.3 pushback -->
-	<section>
-		<div class="slide">
-			<header class="slide-head">
-				<div class="kicker">Synthesis <span class="sep">/</span> 03</div>
-				<h2>The questions I&rsquo;d expect you to ask</h2>
-				<p class="dek">Four places this design has to hold up, and how I&rsquo;d answer.</p>
-			</header>
-			<div class="slide-body">
-				<div class="g2 grow">
-					<div class="card rail">
-						<div class="card-t">&ldquo;How do you guarantee exactly-once?&rdquo;</div>
-						<p style="font-size:16.5px;line-height:1.45;"><b>You don&rsquo;t &mdash; and that&rsquo;s the right answer.</b> You can&rsquo;t guarantee a message is <i>delivered</i> exactly once over a network. You can guarantee it has the
-							<i>same effect</i> once: deliver at least once, and make each step safe to repeat. Every stage writes under the same key, so a repeat just overwrites with identical data.</p>
-						<div class="note"><b>The one place to be careful</b> is the AI call itself. It&rsquo;s expensive, so check whether you already have the answer <i>before</i> making it.</div>
-					</div>
-					<div class="card rail">
-						<div class="card-t">&ldquo;One stage is 10&times; slower than the rest.&rdquo;</div>
-						<p style="font-size:16.5px;line-height:1.45;">Start by measuring, not guessing. <b>Queue length</b> and <b>how old the oldest item is</b> tell you exactly where the backlog sits.
-							Then fix that one stage: more workers if it&rsquo;s waiting on I/O, batching if the per-call overhead dominates, a cheaper model if it&rsquo;s cost.</p>
-						<div class="note"><b>Don&rsquo;t</b> scale the whole pipeline evenly. That&rsquo;s exactly the mistake OptiServe&rsquo;s search exists to avoid.</div>
-					</div>
-					<div class="card rail">
-						<div class="card-t">&ldquo;The LLM provider has an outage.&rdquo;</div>
-						<p style="font-size:16.5px;line-height:1.45;">Stop calling the broken provider, switch to a backup or a smaller local model, and <b>record which model actually did the work</b>,
-							so your quality numbers don&rsquo;t quietly mix two different models together.</p>
-						<div class="note">If you have hours to finish, <b>the queue absorbs a 20-minute outage completely</b>. That&rsquo;s the main reason to use queues here instead of direct calls.</div>
-					</div>
-					<div class="card rail">
-						<div class="card-t">&ldquo;How do you control cost?&rdquo;</div>
-						<p style="font-size:16.5px;line-height:1.45;">Three levers, biggest first: <b>(1) don&rsquo;t do the work at all</b> &mdash; skip duplicates and pages that already have text;
-							<b>(2) use the smallest model that works</b> for each page; <b>(3) cache on the content hash</b>, because the same forms show up again and again across cases.</p>
-						<div class="note">Then track <b>cost per case next to quality, with the model version attached</b> &mdash; so an accuracy win that doubles your bill shows up on the same dashboard.</div>
-					</div>
-				</div>
-			</div>
-			<div class="crumb">Synthesis &mdash; 3 / 3</div>
-		</div>
-		<aside class="notes">
-			These four are the most likely deep-dives. The "you don't guarantee exactly-once" answer is
-			the highest-signal thing you can say in this whole section — deliver it flatly and without
-			hedging, then immediately explain the key that makes repeats safe.
-		</aside>
-	</section>
-
-</section>
-
-<!-- =====================================================================
-     SECTION 6 — CLOSE
-     ===================================================================== -->
-<section>
 	<div class="hero">
-		<div class="eyebrow">Thank you</div>
-		<h1 style="margin-top:16px;font-size:60px;">What I&rsquo;d like<br>to ask you.</h1>
-		<div class="rule"></div>
-		<div class="g2" style="max-width:1160px;gap:14px;">
-			<div class="card"><p style="font-size:17px;line-height:1.45;">How do you pick <b>which model runs at each step</b> today? Is the quality-vs-cost trade-off measured, or decided by judgement?</p></div>
-			<div class="card"><p style="font-size:17px;line-height:1.45;">When a model improves, how do you keep this quarter&rsquo;s quality numbers <b>comparable to last quarter&rsquo;s</b>?</p></div>
-			<div class="card"><p style="font-size:17px;line-height:1.45;">Where does the document pipeline <b>actually get stuck</b> today &mdash; ingestion, the model, or human review?</p></div>
-			<div class="card"><p style="font-size:17px;line-height:1.45;">What&rsquo;s the split between <b>serverless functions and long-running workers</b>, and what drove that choice?</p></div>
-		</div>
-		<div class="idcard" style="margin-top:34px;">
-			<span><b>Arian Boukani</b></span><span class="dot"></span>
+		<div class="eyebrow">Software Engineer</div>
+		<h1>Arian Boukani</h1>
+		<p class="lede">I build real-time backends and AI pipelines.</p>
+
+		<ol class="agenda">
+			<li style="--ac:var(--accent);"><div class="no">01</div><div class="nm">SevenTask</div><div class="ds">Real-time work platform</div></li>
+			<li style="--ac:var(--cyan);"><div class="no">02</div><div class="nm">OptiServe</div><div class="ds">Serverless ML tuning</div></li>
+			<li style="--ac:var(--amber);"><div class="no">03</div><div class="nm">Guardian</div><div class="ds">A 30B model on one desktop</div></li>
+			<li style="--ac:var(--violet);"><div class="no">04</div><div class="nm">Realest</div><div class="ds">Voice agent that phones people</div></li>
+			<li style="--ac:var(--teal);"><div class="no">05</div><div class="nm">BakeryPilot</div><div class="ds">AI agent, human approval</div></li>
+		</ol>
+
+		<div class="idcard">
+			<span>MSc, Systems &amp; Performance Engineering</span><span class="dot"></span>
 			<span class="mono">2arian3.github.io</span><span class="dot"></span>
-			<span class="mono">github.com/2arian3</span><span class="dot"></span>
-			<span class="muted">Deck: <span class="mono">2arian3.github.io/projects</span></span>
+			<span class="mono">github.com/2arian3</span>
 		</div>
 	</div>
 	<aside class="notes">
-		Ask three, not four. The versioning/compat question is the one that signals you think about
-		data products as systems rather than features — lead with it.
+		Intro in 30 seconds: name, MSc, what I build.
+		Five projects, newest work first.
+		SevenTask gets the most time. I co-founded it.
+		Common thread: risky parts behind small interfaces.
+		Invite questions anytime.
 	</aside>
 </section>
+
+<!-- =====================================================================
+     2 — SEVENTASK
+     ===================================================================== -->
+<section class="proj-a">
+
+	<!-- opener -->
+	<section>
+		<div class="opener">
+			<div>
+				<div class="eyebrow">01 · Technical co-founder · 18 months live</div>
+				<h1>SevenTask</h1>
+				<p class="lede">A real-time work platform for distributed teams.</p>
+				<p class="lede quiet">Boards, chat, time tracking, and a full audit trail.</p>
+				<div class="stats">
+					<div class="stat"><div class="v">200+</div><div class="l">monthly active users over 18 months</div></div>
+					<div class="stat"><div class="v">166</div><div class="l">tables, evolved by 164 migrations</div></div>
+					<div class="stat"><div class="v">10</div><div class="l">locales shipped, right-to-left included</div></div>
+				</div>
+				<div class="pills"><span>Angular</span><span>ASP.NET Core</span><span>SignalR</span><span>SQL Server</span><span>EF Core</span><span>Prometheus</span></div>
+			</div>
+			<!-- MEDIA: drop docs/seventask-hero.{png,gif,...} to replace the illustration -->
+			<figure class="media plain visual" data-src="docs/seventask-hero" data-alt="SevenTask">
+				<div class="media-stage">
+					<div class="media-fallback">
+						<div class="board" role="img" aria-label="A board whose columns are defined by the team">
+							<div class="col"><span class="ct">Intake</span><i></i><i></i></div>
+							<div class="col"><span class="ct">Triage</span><i class="on"></i></div>
+							<div class="col"><span class="ct">Review</span><i></i><i></i></div>
+							<div class="col"><span class="ct">Sent</span><i></i></div>
+						</div>
+						<div class="fig-cap">Every team defines its own columns.</div>
+					</div>
+				</div>
+			</figure>
+		</div>
+		<aside class="notes">
+			I co-founded this and owned the architecture.
+			Six engineers, eighteen months, paying teams.
+			Angular, ASP.NET Core, SignalR, SQL Server.
+			If asked about funding: $18K, two small rounds.
+		</aside>
+	</section>
+
+	<!-- system design -->
+	<section>
+		<div class="slide">
+			<header class="head">
+				<div class="kicker">SevenTask · System design</div>
+				<h2>One hub keeps every board in sync.</h2>
+			</header>
+			<div class="split">
+				<!-- MEDIA: drop docs/seventask-architecture.{svg,png,...} to replace the diagram -->
+				<figure class="media dots" data-src="docs/seventask-architecture" data-alt="SevenTask system design">
+					<div class="media-stage">
+						<div class="media-fallback">
+<pre class="mermaid">
+flowchart TB
+  subgraph CL["Clients"]
+    direction LR
+    W["Angular SPA · SSR"]
+    A["Admin app"]
+  end
+  subgraph API["ASP.NET Core"]
+    direction LR
+    R["REST · field-level writes"]
+    H["SignalR hub · 13 typed events"]
+  end
+  subgraph DATA["Data"]
+    direction LR
+    D["Domain package · EF Core"] --> DB[("SQL Server · 166 tables")]
+  end
+  CL --> API
+  API --> DATA
+</pre>
+						</div>
+					</div>
+				</figure>
+				<div class="side">
+					<ol class="points">
+						<li><span class="n">01</span><span class="t">One endpoint per field</span><span class="d">Two people edit one task without colliding.</span></li>
+						<li><span class="n">02</span><span class="t">Typed real-time events</span><span class="d">Thirteen events reach every device and tab.</span></li>
+						<li><span class="n">03</span><span class="t">Versioned domain package</span><span class="d">Each API pins the schema it expects.</span></li>
+					</ol>
+					<p class="foot">Lazy loading is off. Every query is explicit.</p>
+				</div>
+			</div>
+		</div>
+		<aside class="notes">
+			Clients talk to one API. The hub pushes changes.
+			Field-level writes keep concurrent edits apart.
+			Domain and core ship as versioned packages.
+			If asked about scale: the in-process socket registry blocks it.
+		</aside>
+	</section>
+
+	<!-- workflow engine -->
+	<section>
+		<div class="slide">
+			<header class="head">
+				<div class="kicker">SevenTask · Workflow engine</div>
+				<h2>Teams define their own workflow. No deploy.</h2>
+			</header>
+			<div class="split">
+				<!-- MEDIA: drop docs/seventask-workflow.{svg,png,...} to replace the diagram -->
+				<figure class="media dots" data-src="docs/seventask-workflow" data-alt="How a task transition is validated">
+					<div class="media-stage">
+						<div class="media-fallback">
+<pre class="mermaid">
+flowchart TB
+  subgraph G["Guards, in order"]
+    direction LR
+    G1["Task exists"] --> G2["Caller has access"] --> G3["Column is on this board"]
+  end
+  subgraph W["One transaction"]
+    direction LR
+    W1["Update status"] --> W2["Append transition"] --> W3["Append event + parameters"]
+  end
+  G --> W
+</pre>
+						</div>
+					</div>
+				</figure>
+				<div class="side">
+					<ol class="points">
+						<li><span class="n">01</span><span class="t">Columns are rows</span><span class="d">Scoped to a project, team, or person.</span></li>
+						<li><span class="n">02</span><span class="t">Guarded transitions</span><span class="d">A card cannot enter another board's column.</span></li>
+						<li><span class="n">03</span><span class="t">Append-only history</span><span class="d">Every move keeps who, what, and when.</span></li>
+					</ol>
+					<p class="foot">One stored event renders in ten locales.</p>
+				</div>
+			</div>
+		</div>
+		<aside class="notes">
+			Columns began as an enum. Every customer wanted different ones.
+			Now a column is a row, scoped three ways.
+			The third guard makes cross-board moves impossible.
+			Events store a template plus typed parameters.
+			They are localized per recipient at delivery time.
+		</aside>
+	</section>
+
+	<!-- demo -->
+	<section>
+		<div class="slide">
+			<header class="head">
+				<div class="kicker">SevenTask · Demo</div>
+				<h2>Drag a card. Everyone sees it move.</h2>
+			</header>
+			<div class="split">
+				<!-- MEDIA: drop docs/seventask-demo.{gif,mp4,...} -->
+				<figure class="media chrome" data-src="docs/seventask-demo" data-alt="SevenTask demo">
+					<div class="media-stage">
+						<div class="media-empty">
+							<div class="play"></div>
+							<b>Demo</b>
+							<span>Board, live updates, activity history</span>
+							<code>docs/seventask-demo.gif</code>
+						</div>
+					</div>
+				</figure>
+				<div class="side">
+					<div class="stat-stack">
+						<div class="stat"><div class="v">164</div><div class="l">migrations in nine months, no data loss</div></div>
+						<div class="stat"><div class="v">0 ms</div><div class="l">perceived drag latency, painted first</div></div>
+						<div class="stat"><div class="v">0</div><div class="l">duplicate receipts after a composite key</div></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<aside class="notes">
+			Narrate: drag, peers update, history row appears.
+			The card paints first, then rolls back on failure.
+			Read receipts had a check-then-insert race.
+			A composite primary key removed it structurally.
+		</aside>
+	</section>
+
+</section>
+
+<!-- =====================================================================
+     3 — OPTISERVE
+     ===================================================================== -->
+<section class="proj-b">
+
+	<!-- opener -->
+	<section>
+		<div class="opener">
+			<div>
+				<div class="eyebrow">02 · MSc thesis · solo</div>
+				<h1>OptiServe</h1>
+				<p class="lede">Auto-tunes memory and model for serverless ML pipelines.</p>
+				<div class="stats">
+					<div class="stat"><div class="v">40,960</div><div class="l">configs in a 3-function benchmark</div></div>
+					<div class="stat"><div class="v">27.5×</div><div class="l">latency gap, best vs. worst config</div></div>
+					<div class="stat"><div class="v">96–99%</div><div class="l">of optimal, found by greedy search</div></div>
+				</div>
+				<div class="pills"><span>Python</span><span>AWS Lambda</span><span>Step Functions</span><span>CloudWatch</span><span>SciPy</span><span>moto</span></div>
+			</div>
+			<!-- MEDIA: drop docs/optiserve-hero.{png,gif,...} to replace the illustration -->
+			<figure class="media plain visual" data-src="docs/optiserve-hero" data-alt="OptiServe">
+				<div class="media-stage">
+					<div class="media-fallback">
+						<svg class="ucurve" viewBox="0 0 520 340" role="img" aria-label="Schematic: cost per run falls, then rises, as memory grows">
+							<line class="ax" x1="44" y1="292" x2="500" y2="292"/>
+							<line class="ax" x1="44" y1="28" x2="44" y2="292"/>
+							<line class="ax" x1="234" y1="250" x2="234" y2="292"/>
+							<path class="c" d="M64,64 C112,226 172,250 234,250 C302,250 404,214 490,112"/>
+							<circle class="dot" cx="234" cy="250" r="8"/>
+							<text class="hi" x="234" y="224" text-anchor="middle">Sweet spot</text>
+							<text class="lb" x="500" y="320" text-anchor="end">Memory →</text>
+							<text class="lb" x="44" y="16">Cost per run</text>
+						</svg>
+						<div class="fig-cap">More memory can cost less.</div>
+					</div>
+				</div>
+			</figure>
+		</div>
+		<aside class="notes">
+			Lambda has one knob: memory. It also sets CPU.
+			You pay memory times duration, so cost curves bend.
+			ML adds a second knob: which model to serve.
+			OptiServe picks both, per step, under constraints.
+			Search strategies come from published research. The engineering is mine.
+		</aside>
+	</section>
+
+	<!-- system design -->
+	<section>
+		<div class="slide">
+			<header class="head">
+				<div class="kicker">OptiServe · System design</div>
+				<h2>Measure live. Optimize offline.</h2>
+			</header>
+			<div class="split">
+				<!-- MEDIA: drop docs/optiserve-architecture.{svg,png,...} to replace the diagram -->
+				<figure class="media dots" data-src="docs/optiserve-architecture" data-alt="OptiServe system design">
+					<div class="media-stage">
+						<div class="media-fallback">
+<pre class="mermaid">
+flowchart LR
+  subgraph ON["Online · real AWS"]
+    direction TB
+    L["Live Lambda"] --> P["Profiler"] --> F["Curve fit"]
+  end
+  subgraph OFF["Offline · pure math"]
+    direction TB
+    W["Workflow model"] --> O["Greedy optimizer"] --> R["Best config"]
+  end
+  ON -->|"lookup table"| OFF
+</pre>
+						</div>
+					</div>
+				</figure>
+				<div class="side">
+					<ol class="points">
+						<li><span class="n">01</span><span class="t">Profile</span><span class="d">Sweep memory sizes on a live Lambda.</span></li>
+						<li><span class="n">02</span><span class="t">Model</span><span class="d">Fit latency curves. Collapse loops and branches.</span></li>
+						<li><span class="n">03</span><span class="t">Optimize</span><span class="d">Greedy search along the critical path.</span></li>
+					</ol>
+					<p class="foot">137 of 155 tests need no AWS.</p>
+				</div>
+			</div>
+		</div>
+		<aside class="notes">
+			Left half costs money and is noisy.
+			Right half is free and deterministic.
+			They meet at one method. Curves become a table.
+			Why greedy: sub-second, and the gap is measured.
+			Bug stories if asked: prep guide, Story 1.
+		</aside>
+	</section>
+
+	<!-- demo + results -->
+	<section>
+		<div class="slide">
+			<header class="head">
+				<div class="kicker">OptiServe · Demo</div>
+				<h2>Near-optimal, and checked against brute force.</h2>
+			</header>
+			<div class="split">
+				<!-- MEDIA: drop docs/optiserve-demo.{gif,mp4,...} -->
+				<figure class="media chrome" data-src="docs/optiserve-demo" data-alt="OptiServe demo">
+					<div class="media-stage">
+						<div class="media-empty">
+							<div class="play"></div>
+							<b>Demo</b>
+							<span>Terminal run: optiserve optimize on App3</span>
+							<code>docs/optiserve-demo.gif</code>
+						</div>
+					</div>
+				</figure>
+				<div class="side">
+					<div class="stat-stack">
+						<div class="stat"><div class="v">98.6%</div><div class="l">mean vs. brute force, min-cost mode</div></div>
+						<div class="stat"><div class="v">~1,300×</div><div class="l">faster acquisition step, same output</div></div>
+						<div class="stat"><div class="v">2.99×</div><div class="l">faster optimizer with exact-match caching</div></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<aside class="notes">
+			Narrate the demo: workflow in, configuration out.
+			98.6% is the best strategy's mean.
+			The other two average 96.8% and 95.7%.
+			Worst case is 0% on one point. Say it.
+			Caching keys on exact numbers. Output stays byte-identical.
+		</aside>
+	</section>
+
+</section>
+
+<!-- =====================================================================
+     4 — GUARDIAN ON DGX SPARK
+     ===================================================================== -->
+<section class="proj-e">
+
+	<!-- opener -->
+	<section>
+		<div class="opener">
+			<div>
+				<div class="eyebrow">03 · NVIDIA Spark Hack Toronto · inference layer</div>
+				<h1>Guardian</h1>
+				<p class="lede">Moved a six-agent health app onto one desktop GPU.</p>
+				<p class="lede quiet">Patient data never leaves the room.</p>
+				<div class="stats">
+					<div class="stat"><div class="v">30B</div><div class="l">parameters, about 3B active per token</div></div>
+					<div class="stat"><div class="v">~16 GB</div><div class="l">4-bit weights, down from ~60 GB</div></div>
+					<div class="stat"><div class="v">1</div><div class="l">file imports a model vendor's SDK</div></div>
+				</div>
+				<div class="pills"><span>TensorRT-LLM</span><span>NVFP4</span><span>Nemotron Nano</span><span>FastAPI</span><span>LangGraph</span><span>Docker</span></div>
+			</div>
+			<!-- MEDIA: drop docs/guardian-hero.{png,gif,...} to replace the illustration -->
+			<figure class="media plain visual" data-src="docs/guardian-hero" data-alt="Guardian">
+				<div class="media-stage">
+					<div class="media-fallback">
+						<div class="moe" role="img" aria-label="30 tiles, 3 lit: about a tenth of the model runs per token">
+							<i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i>
+							<i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i>
+							<i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i>
+						</div>
+						<div class="fig-cap">30B stored. About 3B used per token.</div>
+					</div>
+				</div>
+			</figure>
+		</div>
+		<aside class="notes">
+			Team built the agents and apps. I owned the model layer.
+			DGX Spark: one GPU, 128 GB shared memory.
+			The bottleneck is memory bandwidth, about 273 GB/s.
+			A mixture-of-experts model reads only ~3B per token.
+		</aside>
+	</section>
+
+	<!-- system design -->
+	<section>
+		<div class="slide">
+			<header class="head">
+				<div class="kicker">Guardian · System design</div>
+				<h2>Every model call goes through one door.</h2>
+			</header>
+			<div class="split">
+				<!-- MEDIA: drop docs/guardian-architecture.{svg,png,...} to replace the diagram -->
+				<figure class="media dots" data-src="docs/guardian-architecture" data-alt="Guardian system design">
+					<div class="media-stage">
+						<div class="media-fallback">
+<pre class="mermaid">
+flowchart TB
+  C["Watch · phone · web"] --> APP
+  subgraph APP["App · built by the team"]
+    direction LR
+    A["FastAPI + router"] --> G["6 agents"]
+  end
+  subgraph MINE["Model layer · my part"]
+    direction LR
+    S["LLM interface"] --> T["TensorRT-LLM · NVFP4"]
+    S -.-> O["Cloud API"]
+  end
+  APP --> MINE
+</pre>
+						</div>
+					</div>
+				</figure>
+				<div class="side">
+					<ol class="points">
+						<li><span class="n">01</span><span class="t">One interface</span><span class="d">Agents never touch vendor code.</span></li>
+						<li><span class="n">02</span><span class="t">4-bit weights</span><span class="d">NVFP4 runs natively on Blackwell.</span></li>
+						<li><span class="n">03</span><span class="t">Swappable engines</span><span class="d">Cloud to local was a config change.</span></li>
+					</ol>
+					<p class="foot">KV cache sized so two models fit.</p>
+				</div>
+			</div>
+		</div>
+		<aside class="notes">
+			Point at the interface box first.
+			Only one file imports a vendor library.
+			Engines tried: Ollama, vLLM, TensorRT-LLM.
+			Bug story if asked: thinking mode broke routing.
+		</aside>
+	</section>
+
+	<!-- demo + results -->
+	<section>
+		<div class="slide">
+			<header class="head">
+				<div class="kicker">Guardian · Demo</div>
+				<h2>Two models on one desktop box.</h2>
+			</header>
+			<div class="split">
+				<!-- MEDIA: drop docs/guardian-demo.{gif,mp4,...} -->
+				<figure class="media chrome" data-src="docs/guardian-demo" data-alt="Guardian demo">
+					<div class="media-stage">
+						<div class="media-empty">
+							<div class="play"></div>
+							<b>Demo</b>
+							<span>Dashboard: routing and tool calls, live</span>
+							<code>docs/guardian-demo.gif</code>
+						</div>
+					</div>
+				</figure>
+				<div class="side">
+					<div class="bars">
+						<div class="ttl">Weights read per token</div>
+						<div class="sub">3B active parameters</div>
+						<div class="bar" title="BF16: about 6 GB per token"><span class="k">BF16</span><span class="track"><span class="fill" style="--p:100%;"></span><span class="val">6 GB</span></span></div>
+						<div class="bar" title="FP8: about 3 GB per token"><span class="k">FP8</span><span class="track"><span class="fill" style="--p:50%;"></span><span class="val">3 GB</span></span></div>
+						<div class="bar hi" title="NVFP4: about 1.5 GB per token"><span class="k">NVFP4</span><span class="track"><span class="fill" style="--p:25%;"></span><span class="val">1.5 GB</span></span></div>
+					</div>
+					<div class="stat-stack">
+						<div class="stat"><div class="v">121 GiB</div><div class="l">memory shared by CPU and GPU</div></div>
+						<div class="stat"><div class="v">~29 GiB</div><div class="l">still free with both models loaded</div></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<aside class="notes">
+			Narrate: one question, routed, tools firing live.
+			4-bit reads a quarter of BF16's bytes.
+			Decode is bandwidth-bound. Fewer bytes, more tokens.
+			No latency benchmarks logged. Say so if asked.
+		</aside>
+	</section>
+
+</section>
+
+<!-- =====================================================================
+     5 — REALEST
+     ===================================================================== -->
+<section class="proj-d">
+
+	<!-- opener -->
+	<section>
+		<div class="opener">
+			<div>
+				<div class="eyebrow">04 · Agents Everywhere hackathon · one day</div>
+				<h1>Realest</h1>
+				<p class="lede">A voice agent that phones listing agents for you.</p>
+				<p class="lede quiet">It asks what listings never say.</p>
+				<div class="stats">
+					<div class="stat"><div class="v">4</div><div class="l">agents called in parallel, mid-conversation</div></div>
+					<div class="stat"><div class="v">104</div><div class="l">listings ranked while you talk</div></div>
+					<div class="stat"><div class="v">32</div><div class="l">tests that need no phone</div></div>
+				</div>
+				<div class="pills"><span>Python</span><span>FastAPI</span><span>Next.js</span><span>ElevenLabs</span><span>Twilio</span><span>OpenAI</span></div>
+			</div>
+			<!-- MEDIA: drop docs/realest-hero.{png,gif,...} to replace the illustration -->
+			<figure class="media plain visual" data-src="docs/realest-hero" data-alt="Realest">
+				<div class="media-stage">
+					<div class="media-fallback">
+						<div class="acard" role="img" aria-label="A shortlist card verified by a phone call">
+							<span class="st ok">Verified by phone</span>
+							<span class="tt">2 bed · The Annex</span>
+							<span class="mt">$3,200 plus $180 parking · dog allowed</span>
+							<span class="src">Mark, 1:42pm</span>
+						</div>
+						<div class="fig-cap">Facts that exist nowhere online.</div>
+					</div>
+				</div>
+			</figure>
+		</div>
+		<aside class="notes">
+			Built in one day at a hackathon.
+			You call it. It texts a live shortlist.
+			On your word it phones four listing agents.
+			It asks price, availability, parking, pets.
+		</aside>
+	</section>
+
+	<!-- system design -->
+	<section>
+		<div class="slide">
+			<header class="head">
+				<div class="kicker">Realest · System design</div>
+				<h2>One store, written by voice, read by the page.</h2>
+			</header>
+			<div class="split">
+				<!-- MEDIA: drop docs/realest-architecture.{svg,png,...} to replace the diagram -->
+				<figure class="media dots" data-src="docs/realest-architecture" data-alt="Realest system design">
+					<div class="media-stage">
+						<div class="media-fallback">
+<pre class="mermaid">
+flowchart TB
+  subgraph V["Voice · writes"]
+    direction LR
+    R["Renter on a call"] --> T["Webhook tools"]
+    L["4 listing agents"] --> X["Typed extraction"] --> T
+  end
+  subgraph C["Core · single writer"]
+    direction LR
+    RK["rank() · pure function"] --> ST[("Session store · one lock")]
+  end
+  subgraph P["Page · reads"]
+    direction LR
+    PG["Live page polls every 1.2s"]
+  end
+  V --> C
+  C --> P
+</pre>
+						</div>
+					</div>
+				</figure>
+				<div class="side">
+					<ol class="points">
+						<li><span class="n">01</span><span class="t">Schema at the boundary</span><span class="d">Model output enters only as typed fields.</span></li>
+						<li><span class="n">02</span><span class="t">Rank on write</span><span class="d">A pure function reorders the page instantly.</span></li>
+						<li><span class="n">03</span><span class="t">Polling over sockets</span><span class="d">A dropped poll recovers on the next tick.</span></li>
+					</ol>
+					<p class="foot">Webhook, poller, or timeout. Every call resolves.</p>
+				</div>
+			</div>
+		</div>
+		<aside class="notes">
+			Voice writes the store. The page only reads.
+			Every model output crosses a typed schema.
+			Ranking is pure, so speech never waits.
+			If asked about scale: the fan-out needs a queue.
+		</aside>
+	</section>
+
+	<!-- demo -->
+	<section>
+		<div class="slide">
+			<header class="head">
+				<div class="kicker">Realest · Demo</div>
+				<h2>Four calls at once. The board reorders live.</h2>
+			</header>
+			<div class="split">
+				<!-- MEDIA: drop docs/realest-demo.{gif,mp4,...} -->
+				<figure class="media chrome" data-src="docs/realest-demo" data-alt="Realest demo">
+					<div class="media-stage">
+						<div class="media-empty">
+							<div class="play"></div>
+							<b>Demo</b>
+							<span>Preferences change, calls go out, board reorders</span>
+							<code>docs/realest-demo.gif</code>
+						</div>
+					</div>
+				</figure>
+				<div class="side">
+					<div class="stat-stack">
+						<div class="stat"><div class="v">0</div><div class="l">model output parsed by hand</div></div>
+						<div class="stat"><div class="v">120 s</div><div class="l">deadline, so no call hangs</div></div>
+						<div class="stat"><div class="v">1.2 s</div><div class="l">poll keeps the page live</div></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<aside class="notes">
+			Narrate: say a preference, watch the order change.
+			Then four calls, results landing as they come.
+			Duplicate results are a no-op.
+			A dead line becomes no answer, with a draft email.
+		</aside>
+	</section>
+
+</section>
+
+<!-- =====================================================================
+     6 — BAKERYPILOT
+     ===================================================================== -->
+<section class="proj-c">
+
+	<!-- opener -->
+	<section>
+		<div class="opener">
+			<div>
+				<div class="eyebrow">05 · TMLS Hackathon · data, proxy, deploys</div>
+				<h1>BakeryPilot</h1>
+				<p class="lede">An AI copilot for bakery operations.</p>
+				<p class="lede quiet">It can't change data without approval.</p>
+				<div class="stats">
+					<div class="stat"><div class="v">0</div><div class="l">writes without a person's approval</div></div>
+					<div class="stat"><div class="v">125</div><div class="l">API endpoints, shared by people and agents</div></div>
+					<div class="stat"><div class="v">5</div><div class="l">tables where history can't be edited</div></div>
+				</div>
+				<div class="pills"><span>FastAPI</span><span>LangGraph</span><span>PostgreSQL</span><span>Nginx</span><span>Next.js</span><span>GitHub Actions</span></div>
+			</div>
+			<!-- MEDIA: drop docs/bakerypilot-hero.{png,gif,...} to replace the illustration -->
+			<figure class="media plain visual" data-src="docs/bakerypilot-hero" data-alt="BakeryPilot">
+				<div class="media-stage">
+					<div class="media-fallback">
+						<div class="acard" role="img" aria-label="Example action card waiting for approval">
+							<span class="st">Pending approval</span>
+							<span class="tt">Transfer 400 kg of butter</span>
+							<span class="mt">Mississauga → Toronto · oldest lots first</span>
+							<span class="btns"><span>Reject</span><span class="ok">Approve</span></span>
+						</div>
+						<div class="fig-cap">The agent drafts. A person decides.</div>
+					</div>
+				</div>
+			</figure>
+		</div>
+		<aside class="notes">
+			Team hackathon. I owned the database, proxy, and deploys.
+			Ask in plain English. Answers use real stock data.
+			Any change becomes a card someone must approve.
+		</aside>
+	</section>
+
+	<!-- system design -->
+	<section>
+		<div class="slide">
+			<header class="head">
+				<div class="kicker">BakeryPilot · System design</div>
+				<h2>The agent is just another API client.</h2>
+			</header>
+			<div class="split">
+				<!-- MEDIA: drop docs/bakerypilot-architecture.{svg,png,...} to replace the diagram -->
+				<figure class="media dots" data-src="docs/bakerypilot-architecture" data-alt="BakeryPilot system design">
+					<div class="media-stage">
+						<div class="media-fallback">
+<pre class="mermaid">
+flowchart TB
+  subgraph REQ["Ask"]
+    direction LR
+    U["Operator"] --> N["Nginx"] --> B["FastAPI"]
+    B <--> A["LangGraph agents"]
+  end
+  subgraph GATE["Approve"]
+    direction LR
+    C["Action card · pending"] --> H["Person approves"] --> D[("PostgreSQL")]
+  end
+  REQ --> GATE
+</pre>
+						</div>
+					</div>
+				</figure>
+				<div class="side">
+					<ol class="points">
+						<li><span class="n">01</span><span class="t">Same rules as people</span><span class="d">Agents call the public REST API.</span></li>
+						<li><span class="n">02</span><span class="t">Action cards</span><span class="d">Every change waits as pending.</span></li>
+						<li><span class="n">03</span><span class="t">Rules in Postgres</span><span class="d">Triggers block edits to history.</span></li>
+					</ol>
+					<p class="foot">Approval commits card, data, and audit together.</p>
+				</div>
+			</div>
+		</div>
+		<aside class="notes">
+			No agent has direct database access.
+			Worst case: a pending card nobody approves.
+			Constraints live in Postgres, so every path obeys.
+			Streaming bug if asked: Nginx buffering, then timeout.
+		</aside>
+	</section>
+
+	<!-- demo + results -->
+	<section>
+		<div class="slide">
+			<header class="head">
+				<div class="kicker">BakeryPilot · Demo</div>
+				<h2>Ask in plain English. Approve with one click.</h2>
+			</header>
+			<div class="split">
+				<!-- MEDIA: drop docs/bakerypilot-demo.{gif,mp4,...} -->
+				<figure class="media chrome" data-src="docs/bakerypilot-demo" data-alt="BakeryPilot demo">
+					<div class="media-stage">
+						<div class="media-empty">
+							<div class="play"></div>
+							<b>Demo</b>
+							<span>Chat, live status, action card, approve</span>
+							<code>docs/bakerypilot-demo.gif</code>
+						</div>
+					</div>
+				</figure>
+				<div class="side">
+					<div class="stat-stack">
+						<div class="stat"><div class="v">143</div><div class="l">tests, no database or API key needed</div></div>
+						<div class="stat"><div class="v">0</div><div class="l">deploy secrets stored anywhere</div></div>
+						<div class="stat"><div class="v">30</div><div class="l">backups kept, one before each migration</div></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<aside class="notes">
+			Narrate: question, live status, card, approve.
+			Push to main deploys itself. Runner lives on the server.
+			Known gaps if asked: HTTP only, one server.
+		</aside>
+	</section>
+
+</section>
+
+<!-- =====================================================================
+     7 — HOW I WORK
+     ===================================================================== -->
+<section class="proj-a">
+	<div class="slide">
+		<header class="head">
+			<div class="kicker">How I work</div>
+			<h2>Three habits across every project.</h2>
+		</header>
+		<div class="habits">
+			<div class="habit">
+				<div class="n">01</div>
+				<div class="t">Put the risky part behind one seam.</div>
+				<div class="d">Swap a vendor without touching the pipeline.</div>
+				<div class="tags"><span>Guardian</span><span>Realest</span></div>
+			</div>
+			<div class="habit">
+				<div class="n">02</div>
+				<div class="t">Measure before claiming.</div>
+				<div class="d">Every number here traces to a source.</div>
+				<div class="tags"><span>OptiServe</span></div>
+			</div>
+			<div class="habit">
+				<div class="n">03</div>
+				<div class="t">Make answers traceable.</div>
+				<div class="d">Who changed what, when, and from where.</div>
+				<div class="tags"><span>SevenTask</span><span>BakeryPilot</span></div>
+			</div>
+		</div>
+	</div>
+	<aside class="notes">
+		One seam: the model or vendor stays swappable.
+		Measure: every number here has a source.
+		Traceable: append-only history, approvals, model versions.
+		Keep this short. It is the bridge to questions.
+	</aside>
+</section>
+
+<!-- =====================================================================
+     8 — CLOSE
+     ===================================================================== -->
+<section class="proj-a">
+	<div class="hero">
+		<div class="eyebrow">Thank you</div>
+		<h1 class="close-title">Questions?</h1>
+		<p class="lede">Happy to go deeper on any project.</p>
+		<div class="idcard">
+			<span><b>Arian Boukani</b></span><span class="dot"></span>
+			<span class="mono">2arian3.github.io</span><span class="dot"></span>
+			<span class="mono">github.com/2arian3</span><span class="dot"></span>
+			<span>Deck: <span class="mono">2arian3.github.io/projects</span></span>
+		</div>
+	</div>
+	<aside class="notes">
+		Offer a code walkthrough of any project.
+		SevenTask and Realest have the deepest stories.
+	</aside>
+</section>
+
 </div><!-- /.slides -->
 </div><!-- /.reveal -->
 
 <!-- ===== Reveal.js 5.2.1 core + plugins (classic scripts, no modules) ===== -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.2.1/reveal.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.2.1/plugin/notes/notes.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.2.1/plugin/highlight/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.2.1/plugin/zoom/zoom.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.2.1/plugin/search/search.min.js"></script>
 
-<!-- Mermaid 11 — the cdnjs build is a classic script that assigns globalThis.mermaid,
-     so no ES-module/CORS handling is needed and it also works from file:// -->
+<!-- Mermaid 11: the cdnjs build is a classic script that assigns globalThis.mermaid -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.12.0/mermaid.min.js"></script>
 
 <script>
@@ -1962,7 +1208,7 @@ flowchart TB
   'use strict';
 
   /* ------------------------------------------------------------------
-     1. Mermaid theme — bound to the same palette as the CSS tokens.
+     1. Mermaid theme, bound to the same palette as the CSS tokens.
      ------------------------------------------------------------------ */
   var MERMAID_CONFIG = {
     startOnLoad: false,
@@ -1971,34 +1217,30 @@ flowchart TB
     fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif',
     themeVariables: {
       background:        '#ffffff',
-      primaryColor:      '#eff6ff',
+      primaryColor:      '#ffffff',
       primaryTextColor:  '#0f172a',
-      primaryBorderColor:'#2563eb',
+      primaryBorderColor:'#94a3b8',
       secondaryColor:    '#f1f5f9',
-      secondaryTextColor:'#1e293b',
-      secondaryBorderColor:'#94a3b8',
       tertiaryColor:     '#ffffff',
-      tertiaryTextColor: '#334155',
-      tertiaryBorderColor:'#cbd5e1',
       lineColor:         '#64748b',
       textColor:         '#0f172a',
-      mainBkg:           '#eff6ff',
-      nodeBorder:        '#2563eb',
+      mainBkg:           '#ffffff',
+      nodeBorder:        '#94a3b8',
       clusterBkg:        '#f8fafc',
       clusterBorder:     '#cbd5e1',
-      titleColor:        '#0f172a',
+      titleColor:        '#334155',
       edgeLabelBackground:'#ffffff',
-      fontSize:          '17px'
+      fontSize:          '20px'
     },
     flowchart: {
       useMaxWidth: false,
-      htmlLabels: false,   /* SVG text labels — required for reliable scaling inside slides */
+      htmlLabels: false,   /* SVG text labels, required for reliable scaling inside slides */
       curve: 'basis',
-      nodeSpacing: 26,
-      rankSpacing: 34,
-      padding: 8,
-      diagramPadding: 8,
-      subGraphTitleMargin: { top: 8, bottom: 16 }
+      nodeSpacing: 34,
+      rankSpacing: 46,
+      padding: 12,
+      diagramPadding: 10,
+      subGraphTitleMargin: { top: 8, bottom: 14 }
     }
   };
 
@@ -2007,20 +1249,15 @@ flowchart TB
   }
 
   /* ------------------------------------------------------------------
-     2. Render every diagram BEFORE Reveal initializes.
-
-     Reveal hides non-current slides, which gives Mermaid a zero-width
-     box to measure. So each diagram is rendered inside an off-screen
-     staging div that has a real, fixed layout width, then the finished
-     <svg> is injected into the slide. Deterministic, and immune to
-     slide visibility.
+     2. Render every diagram BEFORE Reveal initializes, in an off-screen
+        stage with a real width (hidden slides measure as zero).
      ------------------------------------------------------------------ */
   function renderDiagrams() {
     var nodes = Array.prototype.slice.call(document.querySelectorAll('pre.mermaid'));
     if (!nodes.length) return Promise.resolve();
 
     if (typeof window.mermaid === 'undefined') {
-      console.warn('[deck] Mermaid did not load — falling back to diagram source text.');
+      console.warn('[deck] Mermaid did not load; falling back to diagram source text.');
       nodes.forEach(function (el) {
         el.innerHTML = '<div class="diagram-fallback">' + esc(el.textContent.trim()) + '</div>';
       });
@@ -2053,63 +1290,162 @@ flowchart TB
   }
 
   /* ------------------------------------------------------------------
-     3. Reveal.js — 2D navigation.
-        Left/Right  = sections   (Intro / project / project / project / close)
-        Up/Down     = drill-down inside the current section
+     3. Media slots: try docs/<name>.<ext> in order; first hit wins.
+        Videos autoplay muted and loop, like a GIF.
      ------------------------------------------------------------------ */
+  var MEDIA_EXTS = ['gif', 'mp4', 'webm', 'png', 'jpg', 'jpeg', 'webp', 'svg'];
+
+  /* On a web server, ask for headers only, so missing files cost almost
+     nothing on phones. Opened from disk (file://), let the elements probe. */
+  function candidates(base) {
+    var urls = MEDIA_EXTS.map(function (ext) { return base + '.' + ext; });
+    if (!/^https?:$/.test(window.location.protocol) || !window.fetch) return Promise.resolve(urls);
+    return Promise.all(urls.map(function (u) {
+      return fetch(u, { method: 'HEAD', cache: 'no-cache' })
+        .then(function (r) { return r.ok ? u : null; }, function () { return null; });
+    })).then(function (hits) { return hits.filter(Boolean); });
+  }
+
+  function resolveMedia() {
+    document.querySelectorAll('.media[data-src]').forEach(function (fig) {
+      var alt   = fig.getAttribute('data-alt') || '';
+      var stage = fig.querySelector('.media-stage');
+
+      candidates(fig.getAttribute('data-src')).then(function (urls) {
+      (function tryExt(i) {
+        if (i >= urls.length) return;                /* nothing found: keep fallback */
+        var url = urls[i], el;
+        var found = function () { stage.appendChild(el); fig.classList.add('has-media'); };
+        var next  = function () { tryExt(i + 1); };
+
+        if (/\.(mp4|webm)$/.test(url)) {
+          el = document.createElement('video');
+          el.muted = true; el.loop = true; el.autoplay = true; el.playsInline = true;
+          el.setAttribute('muted', ''); el.setAttribute('playsinline', ''); el.setAttribute('aria-label', alt);
+          el.preload = 'auto';
+          el.addEventListener('loadeddata', found, { once: true });
+          el.addEventListener('error', next, { once: true });
+          el.src = url;
+        } else {
+          el = new Image();
+          el.alt = alt;
+          el.onload = found;
+          el.onerror = next;
+          el.src = url;
+        }
+      })(0);
+      });
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     4. Guardian opener: light a different 3 of 30 "experts" every beat.
+     ------------------------------------------------------------------ */
+  function animateExperts() {
+    var grids = Array.prototype.slice.call(document.querySelectorAll('.moe'));
+    if (!grids.length || /print-pdf/i.test(window.location.search)) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    setInterval(function () {
+      grids.forEach(function (g) {
+        var tiles = g.children, picked = {};
+        while (Object.keys(picked).length < 3) picked[Math.floor(Math.random() * tiles.length)] = true;
+        for (var i = 0; i < tiles.length; i++) tiles[i].classList.toggle('on', !!picked[i]);
+      });
+    }, 1600);
+  }
+
+  /* ------------------------------------------------------------------
+     5. Reveal.js. The grid is kept for overview mode (O), but linear
+        navigation means Right / Space always goes to the next slide.
+     ------------------------------------------------------------------ */
+  var CANVAS = {
+    landscape: { width: 1440, height: 830, margin: 0.04 },  /* laptops and desktops */
+    compact:   { width: 1120, height: 540, margin: 0.02 },  /* phones held sideways */
+    portrait:  { width: 540,  height: 960, margin: 0.02 }   /* phones and tablets upright */
+  };
+  var currentMode = window.deckPickMode ? window.deckPickMode() : 'landscape';
+
+  /* Re-pick the canvas when the screen rotates or the window resizes. */
+  function watchMode() {
+    var timer = null;
+    function update() {
+      var next = window.deckPickMode();
+      if (next === currentMode) return;
+      var root = document.documentElement;
+      root.classList.remove('deck-' + currentMode);
+      root.classList.add('deck-' + next);
+      currentMode = next;
+      Reveal.configure(CANVAS[next]);
+    }
+    function onResize() { clearTimeout(timer); timer = setTimeout(update, 120); }
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+  }
+
   function startReveal() {
+    var size = CANVAS[currentMode];
     return Reveal.initialize({
-      width:   1440,
-      height:  830,
-      margin:  0.04,
+      width:   size.width,
+      height:  size.height,
+      margin:  size.margin,
+
+      /* Phones held upright read the deck as a page you scroll. */
+      scrollActivationWidth: 500,
+      scrollLayout: 'full',
+      scrollSnap: 'mandatory',
       minScale: 0.2,
       maxScale: 1.8,
 
-      center: false,               /* content-dense slides anchor to the top */
+      center: false,
       disableLayout: false,
 
-      controls: true,
-      controlsTutorial: true,
-      controlsLayout: 'bottom-right',
-      controlsBackArrows: 'faded',
+      controls: false,             /* keyboard-driven; keeps the screen share clean */
       progress: true,
       slideNumber: 'c/t',
       showSlideNumber: 'all',
 
-      hash: true,                  /* deep-linkable #/2/3 URLs */
+      hash: true,                  /* deep-linkable #/2/1 URLs */
       respondToHashChanges: true,
-      fragmentInURL: true,
-      history: false,              /* `hash` supersedes it in Reveal 4+ */
+      history: false,
 
-      navigationMode: 'default',   /* full 2D grid: L/R across, U/D within */
+      navigationMode: 'linear',
       keyboard: true,
       overview: true,
       touch: true,
       loop: false,
-      rtl: false,
-      shuffle: false,
 
-      transition: 'slide',
-      transitionSpeed: 'default',
+      transition: 'fade',
+      transitionSpeed: 'fast',
       backgroundTransition: 'fade',
 
       pdfMaxPagesPerSlide: 1,
       pdfSeparateFragments: false,
 
-      plugins: [RevealHighlight, RevealNotes, RevealZoom, RevealSearch]
+      plugins: [RevealNotes, RevealZoom, RevealSearch]
     });
   }
 
   /* ------------------------------------------------------------------
-     4. Boot: diagrams first, then Reveal, so layout is measured once.
+     6. Boot: diagrams first, then Reveal, so layout is measured once.
      ------------------------------------------------------------------ */
+  /* Scroll view (phones) lifts slides out of their stacks, so give each
+     slide its own project class to keep its accent colour. */
+  document.querySelectorAll('.reveal .slides > section > section').forEach(function (s) {
+    var m = s.parentElement.className.match(/\bproj-[a-z]\b/);
+    if (m) s.classList.add(m[0]);
+  });
+
+  resolveMedia();
   renderDiagrams()
     .then(startReveal)
     .then(function () {
+      animateExperts();
+      watchMode();
       document.documentElement.setAttribute('data-deck-ready', 'true');
-      console.info('[deck] ready — ' + Reveal.getTotalSlides() + ' slides. ' +
-                   'Arrows navigate, "O" overview, "S" speaker notes, "F" fullscreen, ' +
-                   '"?" help. Append ?print-pdf to the URL to export.');
+      console.info('[deck] ready: ' + Reveal.getTotalSlides() + ' slides. ' +
+                   'Right/Space next, "O" overview, "S" speaker notes, "F" fullscreen. ' +
+                   'Append ?print-pdf to the URL to export.');
     })
     .catch(function (err) { console.error('[deck] init failed:', err); });
 })();
