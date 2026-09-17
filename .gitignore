@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+._*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Claude Code local tooling (delete this line to share .claude/launch.json)
+.claude/
+
+# Private interview prep notes. This repo is public, so keep them local.
+# Use `git add -f <file>` if you ever mean to publish one.
+*Interview*.md
+*INTERVIEW*.md
+*_PREP.md
+*-Prep.md
+
+# Secrets and scratch
+.env
+.env.*
+scratch/
+tmp/

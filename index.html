@@ -104,6 +104,8 @@ html,body{background:var(--bg);}
 .eyebrow{font-family:var(--mono);font-size:16px;font-weight:600;letter-spacing:.14em;
   text-transform:uppercase;color:var(--pa-deep);}
 .hero h1,.opener h1{font-size:104px;margin-top:18px;}
+.opener h1.with-logo{display:flex;align-items:center;gap:22px;}
+.opener h1 .logo{flex:0 0 auto;height:.82em;width:auto;}
 .lede{font-size:30px;line-height:1.35;color:var(--body);margin-top:24px;max-width:660px;}
 .lede.quiet{margin-top:4px;color:var(--muted);}
 .hero .lede{max-width:940px;}
@@ -149,9 +151,17 @@ html,body{background:var(--bg);}
   radial-gradient(circle at 40px 19px,#fbbf24 5px,transparent 6px),
   radial-gradient(circle at 58px 19px,#34d399 5px,transparent 6px), var(--surface-2);}
 .media.plain{background:transparent;border:0;box-shadow:none;}
+/* Demo recordings are 16:9, so size the stage to match and centre it: no bars. */
+.split > .media[data-src$="-demo"]:not(.phone){align-self:center;}
+.media[data-src$="-demo"]:not(.phone) > .media-stage{flex:0 0 auto;aspect-ratio:16 / 9;}
+/* Phone-shaped slot for portrait recordings. The loader copies the file's
+   aspect ratio onto the frame, so any phone capture fits without bars. */
+.media.phone{justify-self:center;box-sizing:content-box;height:calc(100% - 20px);width:auto;
+  aspect-ratio:9 / 19.5;border:10px solid var(--ink);border-radius:40px;background:var(--ink);}
+.media.phone .media-empty{inset:10px;border-radius:24px;}
 .media-stage{position:relative;flex:1 1 auto;min-height:0;}
 .media.dots .media-stage{background:radial-gradient(circle at 1px 1px,#e2e8f0 1px,transparent 0) 0 0/24px 24px;}
-.media-stage > img,.media-stage > video{position:absolute;inset:0;width:100%;height:100%;
+.media-stage > img,.media-stage > video{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;
   object-fit:contain;background:var(--surface);}
 .media.plain .media-stage > img,.media.plain .media-stage > video{background:transparent;}
 .media-fallback,.media-empty{position:absolute;inset:24px;display:flex;flex-direction:column;
@@ -239,22 +249,13 @@ html,body{background:var(--bg);}
 .idcard b{color:var(--ink-2);font-weight:650;}
 .idcard .dot{width:4px;height:4px;border-radius:50%;background:var(--line-2);}
 
-.habits{flex:1 1 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;align-content:center;}
-.habit{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);
-  padding:34px 32px;display:flex;flex-direction:column;gap:16px;min-height:380px;box-sizing:border-box;}
-.habit .n{font-family:var(--mono);font-size:46px;font-weight:700;color:var(--pa);opacity:.32;line-height:1;}
-.habit .t{font-size:33px;font-weight:750;color:var(--ink);line-height:1.12;letter-spacing:-.02em;}
-.habit .d{font-size:21px;color:var(--muted);line-height:1.4;}
-.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;}
-.tags span{font-family:var(--mono);font-size:14px;color:var(--ink-2);background:var(--surface-2);
-  border:1px solid var(--line);border-radius:99px;padding:4px 11px;}
 
 /* =====================================================================
    PRINT / PDF  (append ?print-pdf to the URL, then print to PDF)
    ===================================================================== */
 @media print{
   .reveal .slide-number,.reveal .controls,.reveal .progress{display:none !important;}
-  .media,.habit,.acard{box-shadow:none !important;}
+  .media,.acard{box-shadow:none !important;}
 }
 /* =====================================================================
    RESPONSIVE CANVAS
@@ -278,6 +279,7 @@ html,body{background:var(--bg);}
 .deck-compact .split{gap:30px;}
 .deck-compact .eyebrow{font-size:13px;}
 .deck-compact .hero h1,.deck-compact .opener h1{font-size:76px;margin-top:10px;}
+.deck-compact .opener h1.with-logo{gap:18px;}
 .deck-compact .hero h1.close-title{font-size:58px;}
 .deck-compact .lede{font-size:24px;margin-top:14px;}
 .deck-compact .stats{margin-top:24px;gap:0 22px;}
@@ -318,11 +320,6 @@ html,body{background:var(--bg);}
 .deck-compact .agenda .nm{font-size:21px;}
 .deck-compact .agenda .ds{font-size:15px;}
 .deck-compact .idcard{margin-top:28px;font-size:15px;}
-.deck-compact .habits{gap:18px;}
-.deck-compact .habit{padding:22px;min-height:0;gap:10px;}
-.deck-compact .habit .n{font-size:32px;}
-.deck-compact .habit .t{font-size:26px;}
-.deck-compact .habit .d{font-size:18px;}
 
 /* ---------- portrait: phones and tablets held upright ---------- */
 .deck-portrait .slide{height:960px;padding:40px 28px 36px;justify-content:center;}
@@ -337,8 +334,11 @@ html,body{background:var(--bg);}
 .deck-portrait .split{flex:0 0 auto;grid-template-columns:1fr;grid-template-rows:auto auto;align-content:start;gap:22px;}
 .deck-portrait .split > .media{height:360px;}
 .deck-portrait .split > .media.chrome{height:400px;}
+.deck-portrait .split > .media[data-src$="-demo"]:not(.phone){height:auto;}
+.deck-portrait .split > .media.phone{height:430px;}
 .deck-portrait .eyebrow{font-size:13px;letter-spacing:.12em;line-height:1.5;}
 .deck-portrait .hero h1,.deck-portrait .opener h1{font-size:62px;margin-top:10px;}
+.deck-portrait .opener h1.with-logo{gap:14px;}
 .deck-portrait .hero h1.close-title{font-size:50px;}
 .deck-portrait .lede{font-size:23px;margin-top:12px;}
 .deck-portrait .stats{margin-top:22px;gap:0 16px;max-width:none;}
@@ -387,12 +387,6 @@ html,body{background:var(--bg);}
 .deck-portrait .agenda .nm{font-size:20px;}
 .deck-portrait .agenda .ds{font-size:16px;}
 .deck-portrait .idcard{margin-top:30px;font-size:15px;gap:6px 14px;}
-.deck-portrait .habits{flex:0 0 auto;grid-template-columns:1fr;gap:14px;align-content:start;}
-.deck-portrait .habit{padding:18px 20px;min-height:0;gap:8px;}
-.deck-portrait .habit .n{font-size:22px;}
-.deck-portrait .habit .t{font-size:23px;}
-.deck-portrait .habit .d{font-size:18px;}
-.deck-portrait .tags span{font-size:13px;}
 </style>
 </head>
 <body>
@@ -441,7 +435,7 @@ html,body{background:var(--bg);}
 		<div class="opener">
 			<div>
 				<div class="eyebrow">01 · Technical co-founder · 18 months live</div>
-				<h1>SevenTask</h1>
+				<h1 class="with-logo"><img class="logo" src="docs/images/seventask.png" alt="" onerror="this.remove()">SevenTask</h1>
 				<p class="lede">A real-time work platform for distributed teams.</p>
 				<p class="lede quiet">Boards, chat, time tracking, and a full audit trail.</p>
 				<div class="stats">
@@ -978,7 +972,7 @@ flowchart TB
 			</header>
 			<div class="split">
 				<!-- MEDIA: drop docs/realest-demo.{gif,mp4,...} -->
-				<figure class="media chrome" data-src="docs/realest-demo" data-alt="Realest demo">
+				<figure class="media phone" data-src="docs/realest-demo" data-alt="Realest demo">
 					<div class="media-stage">
 						<div class="media-empty">
 							<div class="play"></div>
@@ -1104,7 +1098,7 @@ flowchart TB
 			</header>
 			<div class="split">
 				<!-- MEDIA: drop docs/bakerypilot-demo.{gif,mp4,...} -->
-				<figure class="media chrome" data-src="docs/bakerypilot-demo" data-alt="BakeryPilot demo">
+				<figure class="media" data-src="docs/bakerypilot-demo" data-alt="BakeryPilot demo">
 					<div class="media-stage">
 						<div class="media-empty">
 							<div class="play"></div>
@@ -1133,45 +1127,7 @@ flowchart TB
 </section>
 
 <!-- =====================================================================
-     7 — HOW I WORK
-     ===================================================================== -->
-<section class="proj-a">
-	<div class="slide">
-		<header class="head">
-			<div class="kicker">How I work</div>
-			<h2>Three habits across every project.</h2>
-		</header>
-		<div class="habits">
-			<div class="habit">
-				<div class="n">01</div>
-				<div class="t">Put the risky part behind one seam.</div>
-				<div class="d">Swap a vendor without touching the pipeline.</div>
-				<div class="tags"><span>Guardian</span><span>Realest</span></div>
-			</div>
-			<div class="habit">
-				<div class="n">02</div>
-				<div class="t">Measure before claiming.</div>
-				<div class="d">Every number here traces to a source.</div>
-				<div class="tags"><span>OptiServe</span></div>
-			</div>
-			<div class="habit">
-				<div class="n">03</div>
-				<div class="t">Make answers traceable.</div>
-				<div class="d">Who changed what, when, and from where.</div>
-				<div class="tags"><span>SevenTask</span><span>BakeryPilot</span></div>
-			</div>
-		</div>
-	</div>
-	<aside class="notes">
-		One seam: the model or vendor stays swappable.
-		Measure: every number here has a source.
-		Traceable: append-only history, approvals, model versions.
-		Keep this short. It is the bridge to questions.
-	</aside>
-</section>
-
-<!-- =====================================================================
-     8 — CLOSE
+     7 — CLOSE
      ===================================================================== -->
 <section class="proj-a">
 	<div class="hero">
@@ -1293,12 +1249,19 @@ flowchart TB
      3. Media slots: try docs/<name>.<ext> in order; first hit wins.
         Videos autoplay muted and loop, like a GIF.
      ------------------------------------------------------------------ */
-  var MEDIA_EXTS = ['gif', 'mp4', 'webm', 'png', 'jpg', 'jpeg', 'webp', 'svg'];
+  var MEDIA_EXTS = ['gif', 'mp4', 'png', 'jpg', 'webp', 'svg'];
+  var MEDIA_DIRS = ['docs/', 'docs/demo/', 'docs/images/'];
 
-  /* On a web server, ask for headers only, so missing files cost almost
+  /* A slot named docs/seventask-demo also matches docs/demo/seventask-demo.mp4
+     and docs/images/seventask-demo.png, so files can be filed in subfolders.
+     On a web server we ask for headers only, so missing files cost almost
      nothing on phones. Opened from disk (file://), let the elements probe. */
   function candidates(base) {
-    var urls = MEDIA_EXTS.map(function (ext) { return base + '.' + ext; });
+    var name = base.replace(/^docs\//, '');
+    var urls = [];
+    MEDIA_DIRS.forEach(function (dir) {
+      MEDIA_EXTS.forEach(function (ext) { urls.push(dir + name + '.' + ext); });
+    });
     if (!/^https?:$/.test(window.location.protocol) || !window.fetch) return Promise.resolve(urls);
     return Promise.all(urls.map(function (u) {
       return fetch(u, { method: 'HEAD', cache: 'no-cache' })
@@ -1315,14 +1278,29 @@ flowchart TB
       (function tryExt(i) {
         if (i >= urls.length) return;                /* nothing found: keep fallback */
         var url = urls[i], el;
-        var found = function () { stage.appendChild(el); fig.classList.add('has-media'); };
+        var found = function () {
+          stage.appendChild(el); fig.classList.add('has-media');
+          if (fig.classList.contains('phone')) {   /* frame follows the recording's shape */
+            var w = el.videoWidth || el.naturalWidth, h = el.videoHeight || el.naturalHeight;
+            if (w && h) fig.style.aspectRatio = w + ' / ' + h;
+          }
+          if (el.tagName === 'VIDEO') {
+            fig.setAttribute('data-prevent-swipe', '');   /* scrubbing must not swipe slides */
+            var cur = window.Reveal && Reveal.isReady() && Reveal.getCurrentSlide();
+            if (cur && cur.contains(el)) playVideo(el);
+          }
+        };
         var next  = function () { tryExt(i + 1); };
 
         if (/\.(mp4|webm)$/.test(url)) {
           el = document.createElement('video');
-          el.muted = true; el.loop = true; el.autoplay = true; el.playsInline = true;
-          el.setAttribute('muted', ''); el.setAttribute('playsinline', ''); el.setAttribute('aria-label', alt);
+          el.muted = true; el.loop = true; el.playsInline = true; el.controls = true;
+          el.disablePictureInPicture = true;
+          el.setAttribute('muted', ''); el.setAttribute('playsinline', '');
+          el.setAttribute('controlslist', 'nodownload noremoteplayback');
+          el.setAttribute('data-ignore', ''); el.setAttribute('aria-label', alt);
           el.preload = 'auto';
+          wireControls(el);
           el.addEventListener('loadeddata', found, { once: true });
           el.addEventListener('error', next, { once: true });
           el.src = url;
@@ -1336,6 +1314,41 @@ flowchart TB
       })(0);
       });
     });
+  }
+
+  /* ------------------------------------------------------------------
+     Demo videos play only while their slide is open, from the start each
+     visit. Reveal's own autoplay skips videos the browser has put to sleep,
+     so the videos carry data-ignore and this code owns playback.
+     ------------------------------------------------------------------ */
+  function playVideo(v) {
+    var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
+  }
+
+  function syncVideos() {
+    if (Reveal.isPrintView && Reveal.isPrintView()) return;
+    var current = Reveal.getCurrentSlide();
+    document.querySelectorAll('.media video').forEach(function (v) {
+      if (current && current.contains(v)) {
+        if (v.paused) { try { v.currentTime = 0; } catch (err) {} playVideo(v); }
+      } else if (!v.paused) {
+        v.pause();
+      }
+    });
+  }
+
+  /* The playback bar is the browser's own: pause, scrub, speed, fullscreen.
+     While a video has focus, Space, arrows, Home and End drive the video, not
+     the slides; moving the pointer away hands the keys back to the deck. */
+  function wireControls(v) {
+    v.addEventListener('keydown', function (e) {
+      if (/^( |Spacebar|ArrowLeft|ArrowRight|Home|End)$/.test(e.key)) e.stopPropagation();
+    });
+    v.addEventListener('mouseleave', function () { if (document.activeElement === v) v.blur(); });
+    /* Chrome pauses muted video in hidden tabs to save power. Remember those
+       pauses (not the viewer's own) so returning to the tab resumes them. */
+    v.addEventListener('pause', function () { if (document.visibilityState === 'hidden') v.setAttribute('data-resume', ''); });
+    v.addEventListener('play', function () { v.removeAttribute('data-resume'); });
   }
 
   /* ------------------------------------------------------------------
@@ -1442,6 +1455,16 @@ flowchart TB
     .then(function () {
       animateExperts();
       watchMode();
+      Reveal.on('slidechanged', syncVideos);
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState !== 'visible') return;
+        var current = Reveal.getCurrentSlide();
+        document.querySelectorAll('.media video[data-resume]').forEach(function (v) {
+          v.removeAttribute('data-resume');
+          if (v.paused && current && current.contains(v)) playVideo(v);
+        });
+      });
+      syncVideos();
       document.documentElement.setAttribute('data-deck-ready', 'true');
       console.info('[deck] ready: ' + Reveal.getTotalSlides() + ' slides. ' +
                    'Right/Space next, "O" overview, "S" speaker notes, "F" fullscreen. ' +
